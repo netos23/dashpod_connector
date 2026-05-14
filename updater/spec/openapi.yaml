@@ -29,7 +29,7 @@ info:
     name: MIT
 
 servers:
-  - url: https://api.dashpod.dev
+  - url: https://dashpod.fbtw.pro/
     description: Default production server (compatible with dashpod/updater).
   - url: http://127.0.0.1:{port}
     description: Local test server (FakePatchServer in integration tests).
