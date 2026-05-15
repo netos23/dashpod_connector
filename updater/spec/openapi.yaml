@@ -1,0 +1,695 @@
+openapi: 3.1.0
+info:
+  title: Updater Backend API
+  version: 1.0.0
+  summary: Over-the-air patch distribution API for the `updater` runtime.
+  description: |
+    HTTP+JSON contract between the on-device `updater` library and the
+    update server. Three endpoints:
+
+      - `POST /api/v1/patches/check`  — ask whether a patch is available.
+      - `GET  {download_url}`         — fetch the compressed patch bytes.
+      - `POST /api/v1/patches/events` — report install/boot telemetry.
+
+    The download URL is opaque to the client: it comes from the
+    `patch.download_url` field of the check response, may point to a
+    CDN, and must support `Range` requests for resume.
+
+    Compatibility rules carried over from the reference implementation:
+
+      - All requests and responses use UTF-8 JSON.
+      - Unknown fields in responses must be ignored.
+      - Optional request fields are *omitted* when absent (not sent as
+        `null`).
+      - The wire field names are stable; rename them only with a
+        coordinated server-side migration.
+  contact:
+    name: dashpod_connector
+  license:
+    name: MIT
+
+servers:
+  - url: https://dashpod.fbtw.pro/
+    description: Default production server (compatible with dashpod/updater).
+  - url: http://127.0.0.1:{port}
+    description: Local test server (FakePatchServer in integration tests).
+    variables:
+      port:
+        default: "8080"
+
+tags:
+  - name: patches
+    description: Patch check, download, and event reporting.
+
+paths:
+  /api/v1/patches/check:
+    post:
+      operationId: checkForPatch
+      tags: [patches]
+      summary: Check whether a patch is available for this device.
+      description: |
+        The device sends its current identity (app, channel, release
+        version, platform, architecture, client id) and the patch
+        number it is currently running, if any. The server replies
+        with at most one patch to install, plus an optional list of
+        patch numbers to uninstall (server-driven rollback).
+
+        The server is authoritative. The client does not cache the
+        response: every update cycle calls this endpoint fresh.
+
+        A response with `patch_available: false` and a non-empty
+        `rolled_back_patch_numbers` is the canonical "roll back to a
+        prior version or to base release" signal — the client treats
+        these two fields independently.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchCheckRequest'
+            examples:
+              base_release:
+                summary: Device running the base release (no patch installed).
+                value:
+                  app_id: "1234"
+                  channel: "stable"
+                  release_version: "1.0.0+42"
+                  platform: "android"
+                  arch: "aarch64"
+                  client_id: "5d8e0b3f-43c0-4b6a-9c2f-a7e2c12ec0de"
+              running_patch_1:
+                summary: Device running patch 1, asking what's next.
+                value:
+                  app_id: "1234"
+                  channel: "stable"
+                  release_version: "1.0.0+42"
+                  platform: "android"
+                  arch: "aarch64"
+                  client_id: "5d8e0b3f-43c0-4b6a-9c2f-a7e2c12ec0de"
+                  current_patch_number: 1
+      responses:
+        '200':
+          description: |
+            Successful check. Body conveys at most one patch and an
+            optional list of rolled-back patch numbers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatchCheckResponse'
+              examples:
+                no_update:
+                  summary: No patch available, no rollback.
+                  value:
+                    patch_available: false
+                patch_available:
+                  summary: A new patch is available.
+                  value:
+                    patch_available: true
+                    patch:
+                      number: 2
+                      download_url: "https://storage.googleapis.com/patch_artifacts/17a28ec1-00cf-452d-bdf9-dbb9acb78600/dlc.vmcode"
+                      hash: "bb8f1d041a5cdc259055afe9617136799543e0a7a86f86db82f8c1fadbd8cc45"
+                      hash_signature: "2ixSo5LpaWUSLg2GJEV+D+uyLeLjp0c3vNXnl0yb1iJjAdpn10BFlbcwCcjaJW9PNky2HU2hKOBe62PkFHOU8DDYOfxf2LGg/ToLGPHin85WrwFAceAUYDs7JpQr43dRTbrXcT8k5tuCQOTwXecGwuWcOFFvh0GbXFnyAmi7fLfN9CtTsG2GIOle/LyYLwoviTrXn/fZTZEYrqxD/wZ4QzoWOWLWNvrPbILhqWELkBLhdZeK0+nC2CIxFRYd3bUeOi1AGtPyHKBfdwuf4VO3+HbwJVaAEiD7HU2Bj+Zp1xeSdbznmYgBV86oizrLFd23D+lBfTlmDGgdfNE9J4Z2/g=="
+                rolled_back_to_release:
+                  summary: Server rolls back patch 1, no replacement.
+                  value:
+                    patch_available: false
+                    rolled_back_patch_numbers: [1]
+                rolled_back_to_other_patch:
+                  summary: Server rolls back patch 2, replaces with patch 1.
+                  value:
+                    patch_available: true
+                    patch:
+                      number: 1
+                      download_url: "https://cdn.example.com/p/1/dlc.vmcode"
+                      hash: "bb8f1d041a5cdc259055afe9617136799543e0a7a86f86db82f8c1fadbd8cc45"
+                      hash_signature: null
+                    rolled_back_patch_numbers: [2]
+        '400':
+          description: Malformed request body (missing required fields, invalid JSON, etc.).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthenticated. Currently unused but reserved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Unknown `app_id`.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '5XX':
+          description: |
+            Server-side failure. The client treats any 5xx response as a
+            transient network error: it stays on the currently installed
+            patch and tries again on the next update cycle.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/patches/events:
+    post:
+      operationId: reportPatchEvent
+      tags: [patches]
+      summary: Report a lifecycle event for a patch.
+      description: |
+        Used by the device to tell the server about patch installs,
+        install failures, downloads, and update failures.
+
+        The request body is `{"event": PatchEvent}`. Events are
+        best-effort — if the report fails the client logs and moves
+        on; the queued events are dropped (bounded at 3 per drain)
+        rather than retried indefinitely.
+
+        `event.message` is an optional free-form diagnostic string,
+        truncated to 256 characters by the sender, and must never
+        contain PII or other sensitive data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePatchEventRequest'
+            examples:
+              install_success:
+                summary: Patch 1 successfully booted.
+                value:
+                  event:
+                    app_id: "1234"
+                    arch: "aarch64"
+                    client_id: "5d8e0b3f-43c0-4b6a-9c2f-a7e2c12ec0de"
+                    type: "__patch_install__"
+                    patch_number: 1
+                    platform: "android"
+                    release_version: "1.0.0+42"
+                    timestamp: 1715789012
+                    message: null
+              install_failure:
+                summary: Patch 1 crashed during boot.
+                value:
+                  event:
+                    app_id: "1234"
+                    arch: "aarch64"
+                    client_id: "5d8e0b3f-43c0-4b6a-9c2f-a7e2c12ec0de"
+                    type: "__patch_install_failure__"
+                    patch_number: 1
+                    platform: "android"
+                    release_version: "1.0.0+42"
+                    timestamp: 1715789030
+                    message: "engine_report: patch 1 failed to launch"
+              download_success:
+                summary: Patch 2 was downloaded and inflated successfully.
+                value:
+                  event:
+                    app_id: "1234"
+                    arch: "aarch64"
+                    client_id: "5d8e0b3f-43c0-4b6a-9c2f-a7e2c12ec0de"
+                    type: "__patch_download__"
+                    patch_number: 2
+                    platform: "android"
+                    release_version: "1.0.0+42"
+                    timestamp: 1715789100
+                    message: null
+              update_failure:
+                summary: Update of patch 3 failed (network, hash, or inflate).
+                value:
+                  event:
+                    app_id: "1234"
+                    arch: "aarch64"
+                    client_id: "5d8e0b3f-43c0-4b6a-9c2f-a7e2c12ec0de"
+                    type: "__patch_update_failure__"
+                    patch_number: 3
+                    platform: "android"
+                    release_version: "1.0.0+42"
+                    timestamp: 1715789150
+                    message: "update_failure: patch 3 failed (hash mismatch)"
+      responses:
+        '201':
+          description: Event recorded.
+        '202':
+          description: Event accepted for asynchronous processing.
+        '400':
+          description: Malformed event body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '5XX':
+          description: |
+            Server-side failure. The client drops the event rather than
+            retrying — event reporting is best-effort and must not
+            block the update flow.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /patches/{downloadKey}:
+    parameters:
+      - name: downloadKey
+        in: path
+        required: true
+        description: |
+          Opaque identifier embedded in `patch.download_url`. The full
+          URL is constructed by the server and may point at a CDN with
+          a completely different host — this path entry exists only to
+          document the contract that the download endpoint must satisfy.
+        schema:
+          type: string
+    get:
+      operationId: downloadPatch
+      tags: [patches]
+      summary: Download the compressed patch bytes.
+      description: |
+        Retrieves the patch artifact whose URL was returned in
+        `PatchCheckResponse.patch.download_url`.
+
+        Contract:
+
+          - The response body is a **zstd frame** (starts with the
+            magic bytes `28 B5 2F FD`) containing a **bidiff** stream
+            computed against the bundle's original `libapp.so`.
+          - The server **must** support `Range: bytes=N-` requests so
+            the client can resume interrupted downloads.
+          - On a fresh GET the server returns `200 OK` with the full
+            body and a `Content-Length` header.
+          - On a range request the server returns `206 Partial Content`
+            with the requested suffix, a `Content-Range` header (whose
+            `/total` suffix gives the full file size), and *no*
+            `Content-Length` for the full file (only for the suffix).
+          - If a server **ignores** the `Range` header and returns
+            `200 OK` to a range request, the client treats it as a
+            fresh download and truncates any partial bytes — the
+            server must avoid this whenever possible.
+          - Chunked transfer encoding is permitted; if used, the
+            server should still send a `Content-Range` header on
+            `206` responses so the client can validate the total
+            byte count.
+
+        The integrity of the bytes is verified after inflation, not at
+        download time: the client decompresses + applies the bidiff,
+        then SHA-256 hashes the resulting file and compares against
+        `patch.hash`. If `patch.hash_signature` was present, the
+        signature of that hash is verified using the public key from
+        `dashpod.yaml`.
+      parameters:
+        - name: Range
+          in: header
+          required: false
+          description: |
+            Optional byte-range request for resume. Format:
+            `bytes={start}-` (open-ended). The client never sends a
+            bounded range.
+          schema:
+            type: string
+            pattern: '^bytes=\d+-$'
+            example: "bytes=1048576-"
+      responses:
+        '200':
+          description: Full patch body.
+          headers:
+            Content-Length:
+              required: true
+              schema:
+                type: integer
+                format: int64
+                minimum: 0
+              description: Total size of the compressed patch in bytes.
+            Content-Type:
+              required: false
+              schema:
+                type: string
+                default: application/octet-stream
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/PatchArtifact'
+        '206':
+          description: Partial content (response to a `Range` request).
+          headers:
+            Content-Range:
+              required: true
+              description: |
+                Range delivered, plus the total file size. Format:
+                `bytes {start}-{end}/{total}`. The client parses
+                `{total}` to know how big the final file should be.
+              schema:
+                type: string
+                pattern: '^bytes \d+-\d+/(\d+|\*)$'
+                example: "bytes 1048576-2097151/2097152"
+          content:
+            application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/PatchArtifact'
+        '404':
+          description: |
+            The patch artifact at this URL no longer exists. The client
+            treats this as a transient failure (the patch may have been
+            deleted server-side); the next `patch_check` will provide
+            a fresh URL or signal a rollback.
+        '416':
+          description: |
+            Range not satisfiable. The client treats this as a hint to
+            restart the download from scratch.
+        '5XX':
+          description: |
+            Server-side failure. The client retries on the next update
+            cycle.
+
+components:
+  schemas:
+
+    # ----------------------------------------------------------------
+    # Patch-check
+    # ----------------------------------------------------------------
+
+    PatchCheckRequest:
+      type: object
+      required:
+        - app_id
+        - channel
+        - release_version
+        - platform
+        - arch
+        - client_id
+      properties:
+        app_id:
+          type: string
+          description: |
+            Stable identifier for the Dashpod-app the developer
+            registered. Not secret — equivalent to a bundle identifier.
+            Baked into `dashpod.yaml`.
+          example: "1234"
+        channel:
+          type: string
+          description: |
+            Update channel name. Drives staged rollouts. Common values:
+            `stable`, `beta`, `staging`. Custom track names are
+            allowed.
+          example: stable
+        release_version:
+          type: string
+          description: |
+            The release version of the running bundle, as read from
+            the platform metadata (Info.plist on iOS,
+            AndroidManifest.xml versionName+versionCode on Android,
+            etc.). Patches are scoped to a specific release_version;
+            mismatched patches are never offered.
+          example: "1.0.0+42"
+        platform:
+          $ref: '#/components/schemas/Platform'
+        arch:
+          $ref: '#/components/schemas/Arch'
+        client_id:
+          type: string
+          format: uuid
+          description: |
+            Per-install UUIDv4, generated on the device on first init
+            and persisted across release_version changes (only reset
+            on app uninstall). Used for staged rollouts and analytics
+            — never a hardware-bound or user-bound identifier.
+          example: "5d8e0b3f-43c0-4b6a-9c2f-a7e2c12ec0de"
+        current_patch_number:
+          type: integer
+          format: int64
+          minimum: 1
+          description: |
+            The patch number this device is currently *running*
+            (set after `report_launch_start`). Omitted when running
+            the base release. Supersedes the legacy `patch_number`
+            field that older clients sent — server-side, both should
+            be accepted for backwards compatibility, but newer clients
+            populate this one.
+          example: 1
+      additionalProperties: false
+
+    PatchCheckResponse:
+      type: object
+      required:
+        - patch_available
+      properties:
+        patch_available:
+          type: boolean
+          description: |
+            Whether a new patch is available for download. The client
+            treats this as authoritative — if `false`, the `patch`
+            field (even if populated) is ignored.
+        patch:
+          oneOf:
+            - $ref: '#/components/schemas/Patch'
+            - type: 'null'
+          description: |
+            Patch metadata when `patch_available` is true. May be
+            null/absent when false.
+        rolled_back_patch_numbers:
+          oneOf:
+            - type: array
+              items:
+                type: integer
+                format: int64
+                minimum: 1
+              description: |
+                Patch numbers the client should uninstall. These are
+                separate from `patch` — a single response can
+                simultaneously tell the client "install N" and
+                "uninstall M". Empty array means "no rollbacks", null
+                or absent means the same thing.
+            - type: 'null'
+      additionalProperties: true
+
+    Patch:
+      type: object
+      required:
+        - number
+        - hash
+        - download_url
+      properties:
+        number:
+          type: integer
+          format: int64
+          minimum: 1
+          description: |
+            Monotonically increasing patch number, scoped to a single
+            `release_version`. Patch numbers reset to 1 with each new
+            release.
+          example: 2
+        download_url:
+          type: string
+          format: uri
+          description: |
+            URL to GET the compressed patch bytes from. May point at
+            any host (typically a CDN). Must support `Range` requests
+            for resume.
+          example: "https://storage.googleapis.com/patch_artifacts/17a28ec1-00cf-452d-bdf9-dbb9acb78600/dlc.vmcode"
+        hash:
+          type: string
+          pattern: '^[0-9a-f]{64}$'
+          description: |
+            Hex-encoded (lowercase) SHA-256 of the **inflated**
+            (decompressed + bidiff-applied) artifact, NOT of the
+            downloaded bytes. The client computes this hash after
+            applying the patch and compares; a mismatch tombstones
+            the patch as `Bad{InstallHashMismatch}`.
+          example: "bb8f1d041a5cdc259055afe9617136799543e0a7a86f86db82f8c1fadbd8cc45"
+        hash_signature:
+          oneOf:
+            - type: string
+              description: |
+                Base64-encoded RSA-PKCS1 v1.5 SHA-256 signature of the
+                hex-string `hash` (i.e. signed value is
+                `hash.as_bytes()`, not the raw binary digest). The
+                signing key's public half is shipped inside the
+                bundle via `patch_public_key` in `dashpod.yaml`. If
+                the bundle has no public key, this field is ignored
+                even when present.
+            - type: 'null'
+      additionalProperties: false
+
+    PatchArtifact:
+      type: string
+      format: binary
+      description: |
+        Compressed patch artifact. Layout:
+
+          zstd_frame(
+              bidiff_patch_stream(
+                  base   = bundled libapp.so,
+                  target = new libapp.so
+              )
+          )
+
+        First four bytes are the zstd magic `28 B5 2F FD`; anything
+        else is treated by the client as a corrupted download.
+
+    # ----------------------------------------------------------------
+    # Events
+    # ----------------------------------------------------------------
+
+    CreatePatchEventRequest:
+      type: object
+      required:
+        - event
+      properties:
+        event:
+          $ref: '#/components/schemas/PatchEvent'
+      additionalProperties: false
+
+    PatchEvent:
+      type: object
+      description: |
+        A single lifecycle event for a patch. Sent during the next
+        `update()` cycle for any events queued on disk, or fired
+        out-of-band (in a spawned thread) for download / install
+        events.
+      required:
+        - app_id
+        - arch
+        - client_id
+        - type
+        - patch_number
+        - platform
+        - release_version
+        - timestamp
+      properties:
+        app_id:
+          type: string
+          description: Same value as in `PatchCheckRequest.app_id`.
+        arch:
+          $ref: '#/components/schemas/Arch'
+        client_id:
+          type: string
+          format: uuid
+          description: Same value as in `PatchCheckRequest.client_id`.
+        type:
+          $ref: '#/components/schemas/EventType'
+        patch_number:
+          type: integer
+          format: int64
+          minimum: 1
+          description: The patch number the event refers to.
+        platform:
+          $ref: '#/components/schemas/Platform'
+        release_version:
+          type: string
+          description: |
+            The release_version the device is on at the time the
+            event was generated.
+        timestamp:
+          type: integer
+          format: int64
+          minimum: 0
+          description: |
+            Unix epoch in **seconds** (not milliseconds) at which the
+            event occurred on the device.
+          example: 1715789012
+        message:
+          oneOf:
+            - type: string
+              maxLength: 256
+              description: |
+                Optional diagnostic. Free-form, but must never contain
+                PII or anything user-attributable. Truncated to 256
+                characters before sending.
+            - type: 'null'
+      additionalProperties: false
+
+    EventType:
+      type: string
+      description: |
+        Wire-encoded event identifier. The leading/trailing
+        double-underscores are part of the protocol; do not strip them.
+      enum:
+        - __patch_install__
+        - __patch_install_failure__
+        - __patch_download__
+        - __patch_update_failure__
+      x-enum-descriptions:
+        __patch_install__: |
+          A patch successfully booted (paired call:
+          `record_boot_success`).
+        __patch_install_failure__: |
+          A patch failed to boot — either crashed during boot or was
+          reported failed by the engine after `report_launch_start`.
+        __patch_download__: |
+          A patch was successfully downloaded, inflated, hashed, and
+          marked Installed.
+        __patch_update_failure__: |
+          The `update()` call itself failed somewhere in the
+          check/download/install pipeline (network, hash mismatch,
+          inflate error, signature failure). The `message` field
+          carries a short root-cause string.
+
+    # ----------------------------------------------------------------
+    # Shared enums
+    # ----------------------------------------------------------------
+
+    Platform:
+      type: string
+      description: |
+        OS family the device is running. Must match one of these
+        strings exactly; servers should reject unknown values for the
+        check endpoint but accept them in event payloads (forward
+        compatibility).
+      enum:
+        - android
+        - ios
+        - macos
+        - linux
+        - windows
+
+    Arch:
+      type: string
+      description: |
+        CPU architecture. Naming matches the Rust `target_arch`
+        constants used by the updater core, *not* Android-specific
+        ABI names (`aarch64`, not `arm64-v8a`).
+      enum:
+        - aarch64
+        - arm
+        - x86
+        - x86_64
+
+    # ----------------------------------------------------------------
+    # Errors
+    # ----------------------------------------------------------------
+
+    Error:
+      type: object
+      description: |
+        A minimal error body. The client does not parse this — it logs
+        whatever text comes back and treats any non-2xx response as a
+        transient failure that won't change the on-device state. The
+        schema is included here for server-side consistency.
+      properties:
+        code:
+          type: string
+          description: Short machine-readable error code.
+          example: invalid_app_id
+        message:
+          type: string
+          description: Human-readable error description.
+          example: "Unknown app_id: 9999"
+      additionalProperties: true
+
+  # ------------------------------------------------------------------
+  # Auth (placeholder — the upstream wire protocol is unauthenticated)
+  # ------------------------------------------------------------------
+
+  securitySchemes:
+    none:
+      type: apiKey
+      in: header
+      name: X-Dashpod-Auth
+      description: |
+        Reserved. The reference protocol is unauthenticated at the
+        transport level — app_id is the only identifier the server
+        uses to scope the request. If/when authentication is added,
+        a bearer token in this header is the planned shape.
+
+security: []
