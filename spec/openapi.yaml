@@ -1,0 +1,1422 @@
+openapi: 3.1.0
+info:
+  title: Dashpod CodePush API
+  version: "1.0.0"
+  description: |
+    The Dashpod over-the-air code push API.
+
+servers:
+  - url: https://dashpod.fbtw.pro/api/v1
+
+security:
+  - apiKey: []
+  - oauthJwt: []
+
+tags:
+  - name: apps
+    description: Applications and their metadata.
+  - name: releases
+    description: Release builds and their artifacts.
+  - name: patches
+    description: Over-the-air patches for releases.
+  - name: channels
+    description: Release channels.
+  - name: collaborators
+    description: App collaborators and their roles.
+  - name: organizations
+    description: Organizations and membership.
+  - name: users
+    description: Dashpod user accounts.
+  - name: diagnostics
+    description: Infrastructure diagnostics endpoints.
+
+paths:
+  # -------------------------------------------------------------------
+  # Users
+  # -------------------------------------------------------------------
+  /users:
+    post:
+      tags: [users]
+      summary: Create a new user.
+      description: |
+        Creates a new Dashpod user. Email is retrieved from the user's
+        auth token; only the display name is provided in the body.
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The newly-created user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivateUser"
+
+  /users/me:
+    get:
+      tags: [users]
+      summary: Get the currently logged-in user.
+      operationId: getCurrentUser
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The currently logged-in user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivateUser"
+        "404":
+          description: No user is currently logged in.
+
+  # -------------------------------------------------------------------
+  # Apps
+  # -------------------------------------------------------------------
+  /apps:
+    get:
+      tags: [apps]
+      summary: List all apps for the current account.
+      operationId: getApps
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: A list of apps.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAppsResponse"
+    post:
+      tags: [apps]
+      summary: Create a new app.
+      operationId: createApp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The newly-created app.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/App"
+
+  /apps/{appId}:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+    delete:
+      tags: [apps]
+      summary: Delete the specified app.
+      operationId: deleteApp
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "204":
+          description: The app was deleted.
+
+  # -------------------------------------------------------------------
+  # App collaborators
+  # -------------------------------------------------------------------
+  /apps/{appId}/collaborators:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+    post:
+      tags: [collaborators]
+      summary: Add a collaborator to the app by email.
+      operationId: createAppCollaborator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppCollaboratorRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "204":
+          description: The collaborator was added.
+
+  /apps/{appId}/collaborators/{collaboratorId}:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+      - name: collaboratorId
+        in: path
+        required: true
+        schema: { type: integer, format: int64 }
+    patch:
+      tags: [collaborators]
+      summary: Update a collaborator's role on an app.
+      operationId: updateAppCollaborator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAppCollaboratorRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "204":
+          description: The collaborator was updated.
+
+  # -------------------------------------------------------------------
+  # Channels
+  # -------------------------------------------------------------------
+  /apps/{appId}/channels:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+    get:
+      tags: [channels]
+      summary: List channels for the app.
+      operationId: getChannels
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The channels for the app.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Channel"
+    post:
+      tags: [channels]
+      summary: Create a new channel for the app.
+      operationId: createChannel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChannelRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The newly-created channel.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Channel"
+
+  # -------------------------------------------------------------------
+  # Releases
+  # -------------------------------------------------------------------
+  /apps/{appId}/releases:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+    get:
+      tags: [releases]
+      summary: List releases for the app.
+      operationId: getReleases
+      parameters:
+        - name: sideloadable
+          in: query
+          required: false
+          schema: { type: boolean }
+          description: If true, only return releases that can be sideloaded.
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The releases for the app.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetReleasesResponse"
+    post:
+      tags: [releases]
+      summary: Create a new release for the app.
+      operationId: createRelease
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReleaseRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The newly-created release.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateReleaseResponse"
+
+  /apps/{appId}/releases/{releaseId}:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+      - $ref: "#/components/parameters/ReleaseId"
+    get:
+      tags: [releases]
+      summary: Get a specific release.
+      operationId: getRelease
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The requested release.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetReleaseResponse"
+    patch:
+      tags: [releases]
+      summary: Update the release.
+      operationId: updateRelease
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateReleaseRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "204":
+          description: The release was updated.
+
+  /apps/{appId}/releases/{releaseId}/artifacts:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+      - $ref: "#/components/parameters/ReleaseId"
+    get:
+      tags: [releases]
+      summary: Get release artifacts.
+      operationId: getReleaseArtifacts
+      parameters:
+        - name: arch
+          in: query
+          required: false
+          schema: { type: string }
+        - name: platform
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ReleasePlatform"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The artifacts for the release.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetReleaseArtifactsResponse"
+    post:
+      tags: [releases]
+      summary: Register a new release artifact and obtain an upload URL.
+      description: |
+        The server returns a record for the artifact plus a signed upload
+        URL; clients then `POST` the artifact bytes to that URL.
+      operationId: createReleaseArtifact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReleaseArtifactRequest"
+          # The server also accepts multipart/form-data for compatibility
+          # with existing CLI releases; newly-generated clients should
+          # prefer application/json (listed first).
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CreateReleaseArtifactRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The newly-registered release artifact.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateReleaseArtifactResponse"
+
+  /apps/{appId}/releases/{releaseId}/patches:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+      - $ref: "#/components/parameters/ReleaseId"
+    get:
+      tags: [patches]
+      summary: List patches for a release.
+      operationId: getReleasePatches
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The patches for the release.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetReleasePatchesResponse"
+
+  /apps/{appId}/releases/{releaseId}/patches/{patchId}:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+      - $ref: "#/components/parameters/ReleaseId"
+      - $ref: "#/components/parameters/PatchId"
+    patch:
+      tags: [patches]
+      summary: Update a patch.
+      operationId: updatePatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePatchRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "204":
+          description: The patch was updated.
+
+  # -------------------------------------------------------------------
+  # Patches
+  # -------------------------------------------------------------------
+  /apps/{appId}/patches:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+    post:
+      tags: [patches]
+      summary: Create a new patch.
+      operationId: createPatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePatchRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "201":
+          description: The newly-created patch.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePatchResponse"
+
+  /apps/{appId}/patches/{patchId}/artifacts:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+      - $ref: "#/components/parameters/PatchId"
+    post:
+      tags: [patches]
+      summary: Register a new patch artifact and obtain an upload URL.
+      operationId: createPatchArtifact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePatchArtifactRequest"
+          # The server also accepts multipart/form-data for compatibility
+          # with existing CLI releases; newly-generated clients should
+          # prefer application/json (listed first).
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/CreatePatchArtifactRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The newly-registered patch artifact.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatePatchArtifactResponse"
+
+  /apps/{appId}/patches/promote:
+    parameters:
+      - $ref: "#/components/parameters/AppId"
+    post:
+      tags: [patches]
+      summary: Promote a patch to a channel.
+      operationId: promotePatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromotePatchRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "204":
+          description: The patch was promoted.
+
+  /patches/check:
+    post:
+      tags: [patches]
+      summary: Check for an available patch for an install.
+      operationId: patchCheck
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchCheckRequest"
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The patch check result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatchCheckResponse"
+
+  # -------------------------------------------------------------------
+  # Organizations
+  # -------------------------------------------------------------------
+  /organizations:
+    get:
+      tags: [organizations]
+      summary: List organizations the current user is a member of.
+      operationId: getOrganizationMemberships
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The organizations the user is a member of.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOrganizationsResponse"
+
+  /organizations/{organizationId}/apps:
+    parameters:
+      - $ref: "#/components/parameters/OrganizationId"
+    get:
+      tags: [organizations]
+      summary: List apps in an organization.
+      operationId: getOrganizationApps
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The apps belonging to the organization.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOrganizationAppsResponse"
+
+  /organizations/{organizationId}/users:
+    parameters:
+      - $ref: "#/components/parameters/OrganizationId"
+    get:
+      tags: [organizations]
+      summary: List users in an organization.
+      operationId: getOrganizationUsers
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The users belonging to the organization.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOrganizationUsersResponse"
+
+  # -------------------------------------------------------------------
+  # Diagnostics
+  # -------------------------------------------------------------------
+  /diagnostics/gcp_upload:
+    get:
+      tags: [diagnostics]
+      summary: Get a GCP upload link for measuring upload speed.
+      operationId: getGcpUploadSpeedTestUrl
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The upload URL to measure against.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The upload URL to measure against.
+                required: [upload_url]
+                properties:
+                  upload_url:
+                    type: string
+                    description: The GCP-signed upload URL.
+
+  /diagnostics/gcp_download:
+    get:
+      tags: [diagnostics]
+      summary: Get a GCP download link for measuring download speed.
+      operationId: getGcpDownloadSpeedTestUrl
+      responses:
+        default:
+          $ref: "#/components/responses/Error"
+        "200":
+          description: The download URL to measure against.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The download URL to measure against.
+                required: [download_url]
+                properties:
+                  download_url:
+                    type: string
+                    description: The GCP-signed download URL.
+
+components:
+  securitySchemes:
+    apiKey:
+      type: http
+      scheme: bearer
+      description: |
+        **Recommended.** An `sb_api_*` API key minted in the Dashpod
+        console (Account > API Keys). Long-lived, no refresh needed.
+
+    oauthJwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        A JWT access token obtained via Dashpod's interactive OAuth
+        login flow (`Dashpod login`). Short-lived (15 min),
+        auto-refreshed by the CLI using a stored refresh token.
+
+  responses:
+    Error:
+      description: |
+        Standard error response. Emitted for any non-2xx status where a
+        body can be decoded into an [ErrorResponse].
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  parameters:
+    AppId:
+      name: appId
+      in: path
+      required: true
+      schema: { type: string }
+      description: The ID of the app.
+    ReleaseId:
+      name: releaseId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+      description: The ID of the release.
+    PatchId:
+      name: patchId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+      description: The ID of the patch.
+    OrganizationId:
+      name: organizationId
+      in: path
+      required: true
+      schema: { type: integer, format: int64 }
+      description: The ID of the organization.
+
+  schemas:
+    # ---------------- Core domain models ----------------
+
+    App:
+      type: object
+      description: The application downloaded and run on various devices/platforms.
+      required: [id, display_name]
+      properties:
+        id:
+          type: string
+          description: The ID of the app.
+        display_name:
+          type: string
+          description: The display name of the app.
+
+    AppMetadata:
+      type: object
+      description: A single app which contains zero or more releases.
+      required: [app_id, display_name, created_at, updated_at]
+      properties:
+        app_id:
+          type: string
+          description: The ID of the app.
+        display_name:
+          type: string
+          description: The display name of the app.
+        latest_release_version:
+          type: string
+          description: The latest release version of the app.
+        latest_patch_number:
+          type: integer
+          format: int64
+          description: The latest patch number of the app.
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time the app was created.
+        updated_at:
+          type: string
+          format: date-time
+          description: The date and time the app was last updated.
+
+    Channel:
+      type: object
+      description: |
+        A tag used to manage the subset of installs that receive a patch.
+        By default a "stable" channel is created and used by devices to
+        query for available patches.
+      required: [id, app_id, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the channel.
+        app_id:
+          type: string
+          description: The ID of the app.
+        name:
+          type: string
+          description: The channel name.
+
+    Release:
+      type: object
+      description: |
+        A release build of an application that is distributed to devices.
+        A release can have zero or more patches applied to it.
+      required:
+        - id
+        - app_id
+        - version
+        - flutter_revision
+        - platform_statuses
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the release.
+        app_id:
+          type: string
+          description: The ID of the app.
+        version:
+          type: string
+          description: The version of the release.
+        flutter_revision:
+          type: string
+          description: The Flutter revision used to create the release.
+        flutter_version:
+          type: string
+          description: |
+            The Flutter version used to create the release. Optional
+            because it was added later; older releases do not have it.
+        display_name:
+          type: string
+          description: The display name for the release.
+        platform_statuses:
+          type: object
+          description: The status of the release for each platform.
+          additionalProperties:
+            $ref: "#/components/schemas/ReleaseStatus"
+          propertyNames:
+            $ref: "#/components/schemas/ReleasePlatform"
+        created_at:
+          type: string
+          format: date-time
+          description: The date and time the release was created.
+        updated_at:
+          type: string
+          format: date-time
+          description: The date and time the release was last updated.
+        notes:
+          type: string
+          description: Freeform notes associated with the release, if any.
+
+    ReleaseArtifact:
+      type: object
+      description: |
+        An artifact contains metadata about the contents of a specific
+        release for a specific platform and architecture.
+      required:
+        - id
+        - release_id
+        - arch
+        - platform
+        - hash
+        - size
+        - url
+        - can_sideload
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "The ID of the artifact."
+        release_id:
+          type: integer
+          format: int64
+          description: "The ID of the release."
+        arch:
+          type: string
+          description: "The arch of the artifact."
+        platform:
+          $ref: "#/components/schemas/ReleasePlatform"
+          description: "The platform of the artifact."
+        hash:
+          type: string
+          description: "The hash of the artifact."
+        size:
+          type: integer
+          format: int64
+          description: "The size of the artifact in bytes."
+        url:
+          type: string
+          description: "The url of the artifact."
+        podfile_lock_hash:
+          type: string
+          description: sha256 of the Podfile.lock used to create the artifact (iOS only).
+        can_sideload:
+          type: boolean
+          description: Whether the artifact can be sideloaded onto a device.
+
+    Patch:
+      type: object
+      description: |
+        An over-the-air update which is applied to a specific release.
+        All patches have a patch number (auto-incrementing integer) and
+        multiple patches can be published for a given release.
+      required: [id, number]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The unique patch identifier.
+        number:
+          type: integer
+          format: int64
+          description: The patch number. A larger number equates to a newer patch.
+        notes:
+          type: string
+          description: Freeform notes associated with the patch, if any.
+
+    PatchArtifact:
+      type: object
+      description: |
+        Metadata about the contents of a specific patch for a specific
+        platform and architecture.
+      required:
+        - id
+        - patch_id
+        - arch
+        - platform
+        - hash
+        - size
+        - created_at
+      properties:
+        id: { type: integer, format: int64, description: "The ID of the artifact." }
+        patch_id: { type: integer, format: int64, description: "The ID of the patch." }
+        arch: { type: string, description: "The arch of the artifact." }
+        platform: { $ref: "#/components/schemas/ReleasePlatform", description: "The platform of the artifact." }
+        hash: { type: string, description: "The hash of the artifact." }
+        size: { type: integer, format: int64, description: "The size of the artifact in bytes." }
+        created_at:
+          type: string
+          format: date-time
+
+          description: "The date and time the artifact was created."
+    ReleasePatch:
+      type: object
+      description: A patch for a given release.
+      required: [id, number, artifacts, is_rolled_back]
+      properties:
+        id: { type: integer, format: int64, description: "The patch id." }
+        number: { type: integer, format: int64, description: "The patch number." }
+        channel:
+          type: string
+          description: The channel associated with the patch.
+        artifacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/PatchArtifact"
+          description: "The associated patch artifacts."
+        is_rolled_back:
+          type: boolean
+          description: Whether the patch has been rolled back.
+        notes:
+          type: string
+          description: Freeform notes associated with the patch, if any.
+
+    ReleasePlatform:
+      type: string
+      description: A platform to which a Dashpod release can be deployed.
+      enum: [android, ios, linux, macos, windows]
+      x-enum-descriptions:
+        - Android.
+        - iOS.
+        - Linux.
+        - macOS.
+        - Windows.
+
+    ReleaseStatus:
+      type: string
+      description: The status of a release.
+      enum: [draft, active]
+      x-enum-descriptions:
+        - >-
+          The release has been created, but not all platform artifacts have
+          been uploaded.
+        - All platform artifacts have been uploaded for this release.
+
+    Role:
+      type: string
+      description: A role that a user can have relative to an Organization or App.
+      enum: [owner, admin, appManager, developer, viewer, none]
+      x-enum-descriptions:
+        - User that created the organization.
+        - Users who have permissions to manage the organization.
+        - Users who have permissions to manage an app.
+        - Users who are part of the organization but have limited permissions.
+        - Users who have read-only access to the organization.
+        - >-
+          Users who are not part of the organization but have visibility into
+          it via app collaborator permissions.
+
+    AppCollaboratorRole:
+      type: string
+      description: A role a user can have on a specific app.
+      enum: [admin, developer]
+      x-enum-descriptions:
+        - >-
+          A user with this role can perform all available actions on apps,
+          releases, patches, channels, and collaborators.
+        - >-
+          A user with this role can manage releases and patches, but cannot
+          manage collaborators or the application itself.
+
+    AuthProvider:
+      type: string
+      description: The authentication provider used to sign in the user.
+      enum: [google, microsoft, Dashpod]
+      x-enum-descriptions:
+        - Signed in via Google.
+        - Signed in via Microsoft.
+        - Signed in via a Dashpod-managed account.
+
+    OrganizationType:
+      type: string
+      description: |
+        Distinguishes personal organizations (single-user) from team
+        organizations (multi-user).
+      enum: [personal, team]
+      x-enum-descriptions:
+        - A single-user organization implicitly created with each user account.
+        - A multi-user organization with collaborators.
+
+    Organization:
+      type: object
+      description: |
+        An organization groups users and apps together. Organizations
+        can be personal (single-user) or team (multi-user).
+      required: [id, name, organization_type, created_at, updated_at]
+      properties:
+        id: { type: integer, format: int64, description: "The unique identifier for the organization." }
+        name: { type: string, description: "The name of the organization." }
+        organization_type:
+          $ref: "#/components/schemas/OrganizationType"
+          description: "The type of organization."
+        created_at: { type: string, format: date-time, description: "When this organization was created." }
+        updated_at: { type: string, format: date-time, description: "When this organization was last updated." }
+
+    OrganizationMembership:
+      type: object
+      description: An organization and the current user's role in it.
+      required: [organization, role]
+      properties:
+        organization:
+          $ref: "#/components/schemas/Organization"
+          description: "The organization."
+        role:
+          $ref: "#/components/schemas/Role"
+
+          description: "The user's role in the organization."
+    OrganizationUser:
+      type: object
+      description: A member of an organization and their role.
+      required: [user, role]
+      properties:
+        user:
+          $ref: "#/components/schemas/PublicUser"
+          description: "The user that is a member of the organization."
+        role:
+          $ref: "#/components/schemas/Role"
+
+          description: "The role [user] has in the organization."
+    PublicUser:
+      type: object
+      description: |
+        A Dashpod user with non-sensitive information only.
+      required: [id, email]
+      properties:
+        id: { type: integer, format: int64, description: "The user's unique identifier." }
+        email: { type: string, format: email, description: "The user's email address." }
+        display_name: { type: string, description: "The user's name." }
+
+    PrivateUser:
+      type: object
+      description: |
+        A fully-detailed user object, possibly including sensitive
+        information. Should only be used when querying the user's own
+        information.
+      required: [id, email, jwt_issuer]
+      properties:
+        id: { type: integer, format: int64, description: "The unique user identifier." }
+        email: { type: string, format: email, description: "The user's email address, as provided by the user during signup." }
+        display_name: { type: string, description: "The user's name, as provided by the user during signup." }
+        has_active_subscription:
+          type: boolean
+          default: false
+          description: Whether the user is currently a paying customer.
+        stripe_customer_id:
+          type: string
+          description: The user's Stripe customer ID, if they have one.
+        jwt_issuer:
+          type: string
+          description: The JWT issuer used to create the user.
+        patch_overage_limit:
+          type: integer
+          format: int64
+          description: |
+            The maximum number of patch installs the user has agreed to
+            pay for as part of a pay-as-you-go plan.
+
+    ErrorResponse:
+      type: object
+      description: Standard error response body from the Dashpod CodePush API.
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: The unique error code.
+        message:
+          type: string
+          description: Human-readable error message.
+        details:
+          type: string
+          description: Optional details associated with the error.
+
+    # ---------------- Request / response wrappers ----------------
+
+    CreateAppRequest:
+      type: object
+      description: The request body for POST /apps.
+      required: [display_name, organization_id]
+      properties:
+        display_name: { type: string, description: "The display name of the app." }
+        organization_id: { type: integer, format: int64, description: "The id of organization that this app will belong to." }
+
+    CreateAppCollaboratorRequest:
+      type: object
+      description: The request body for POST /apps/{appId}/collaborators.
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          description: The email of the collaborator to add.
+
+    UpdateAppCollaboratorRequest:
+      type: object
+      description: |
+        The request body for PATCH /apps/{appId}/collaborators/{collaboratorId}.
+      required: [role]
+      properties:
+        role:
+          $ref: "#/components/schemas/AppCollaboratorRole"
+
+          description: "The new role for the collaborator."
+    CreateChannelRequest:
+      type: object
+      description: The request body for POST /apps/{appId}/channels.
+      required: [channel]
+      properties:
+        channel:
+          type: string
+          description: The channel name.
+
+    CreateReleaseRequest:
+      type: object
+      description: The request body for POST /apps/{appId}/releases.
+      required: [version, flutter_revision]
+      properties:
+        version: { type: string, description: "The release version." }
+        flutter_revision: { type: string, description: "The Flutter revision used to create the release." }
+        flutter_version: { type: string, description: "The Flutter version used to create the release.  This field is optional because it was newly added and older releases do not have this information." }
+        display_name: { type: string, description: "The display name for the release." }
+
+    CreateReleaseResponse:
+      type: object
+      description: The response body for POST /apps/{appId}/releases.
+      required: [release]
+      properties:
+        release:
+          $ref: "#/components/schemas/Release"
+
+          description: "The newly-created release."
+    UpdateReleaseRequest:
+      type: object
+      description: The request body for PATCH /apps/{appId}/releases/{releaseId}.
+      properties:
+        status:
+          $ref: "#/components/schemas/ReleaseStatus"
+          description: "The desired status of the release. If provided, [platform] must also be provided If null, the status will not be updated."
+        platform:
+          $ref: "#/components/schemas/ReleasePlatform"
+          description: "The platform of the release. If provided, [status] must also be provided."
+        metadata:
+          type: object
+          additionalProperties: true
+          description: |
+            Additional information about the command that was run to
+            update the release and the environment it was run in.
+        notes:
+          type: string
+
+          description: "Notes about the release. This is a free-form field that can be used to store additional information about the release. If null, the notes will not be updated."
+    GetAppsResponse:
+      type: object
+      description: The response body for GET /apps.
+      required: [apps]
+      properties:
+        apps:
+          type: array
+          items:
+            $ref: "#/components/schemas/AppMetadata"
+
+          description: "The list of apps."
+    GetReleasesResponse:
+      type: object
+      description: The response body for GET /apps/{appId}/releases.
+      required: [releases]
+      properties:
+        releases:
+          type: array
+          items:
+            $ref: "#/components/schemas/Release"
+
+          description: "The list of releases for the app."
+    GetReleaseResponse:
+      type: object
+      description: The response body for GET /apps/{appId}/releases/{releaseId}.
+      required: [release]
+      properties:
+        release:
+          $ref: "#/components/schemas/Release"
+
+          description: "The requested release."
+    GetReleaseArtifactsResponse:
+      type: object
+      description: The response body for GET /apps/{appId}/releases/{releaseId}/artifacts.
+      required: [artifacts]
+      properties:
+        artifacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReleaseArtifact"
+
+          description: "The artifacts for the release."
+    GetReleasePatchesResponse:
+      type: object
+      description: The response to GET /apps/{appId}/releases/{releaseId}/patches.
+      required: [patches]
+      properties:
+        patches:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReleasePatch"
+
+          description: "List of patches."
+    GetOrganizationsResponse:
+      type: object
+      description: The response body for GET /organizations.
+      required: [organizations]
+      properties:
+        organizations:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrganizationMembership"
+
+          description: "Organizations that the user is a member of, as well as this user's role in each organization."
+    GetOrganizationAppsResponse:
+      type: object
+      description: The response body for GET /organizations/{organizationId}/apps.
+      required: [apps]
+      properties:
+        apps:
+          type: array
+          items:
+            $ref: "#/components/schemas/AppMetadata"
+
+          description: "The apps that belong to the organization."
+    GetOrganizationUsersResponse:
+      type: object
+      description: The response body for GET /organizations/{organizationId}/users.
+      required: [users]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrganizationUser"
+
+          description: "The list of users that belong to the organization, as well as their roles in the organization."
+    CreateUserRequest:
+      type: object
+      description: |
+        The request body for POST /users. The user's email is taken
+        from the auth token; only the display name is provided here.
+      required: [name]
+      properties:
+        name:
+          type: string
+          description: The new user's display name.
+
+    CreatePatchRequest:
+      type: object
+      description: The request body for POST /apps/{appId}/patches.
+      required: [release_id, metadata]
+      properties:
+        release_id:
+          type: integer
+          format: int64
+          description: "The ID of the release."
+        metadata:
+          type: object
+          additionalProperties: true
+          description: |
+            Additional information about the command that was run to
+            create the patch and the environment it was run in.
+
+    CreatePatchResponse:
+      type: object
+      description: |
+        The response body for POST /apps/{appId}/patches. Deliberately
+        narrower than [Patch]: a freshly-created patch has no `notes`
+        yet (those are set via PATCH /.../{patchId}), so this endpoint
+        exposes only the identifiers the client needs to upload
+        artifacts.
+      required: [id, number]
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The unique patch identifier.
+        number:
+          type: integer
+          format: int64
+          description: The patch number. A larger number equates to a newer patch.
+
+    CreatePatchArtifactRequest:
+      type: object
+      description: |
+        Metadata for a new patch artifact. POST to
+        /apps/{appId}/patches/{patchId}/artifacts and use the returned
+        signed upload URL to upload the artifact bytes separately.
+      required: [arch, platform, hash, size]
+      properties:
+        arch:
+          type: string
+          description: "The arch of the artifact."
+        platform:
+          $ref: "#/components/schemas/ReleasePlatform"
+          description: "The platform of the artifact."
+        hash:
+          type: string
+          description: "The hash of the artifact."
+        hash_signature:
+          type: string
+          description: "The signature of the [hash].  Patch code signing is an opt in feature, introduced later in the life of the product, so when this field is null, the patch does not uses code signing."
+        podfile_lock_hash:
+          type: string
+          description: "The sha256 hash of the Podfile.lock file, if a Podfile.lock file was involved in the creation of the patch (iOS only)."
+        size:
+          type: integer
+          format: int64
+
+          description: "The size of the artifact in bytes."
+    CreatePatchArtifactResponse:
+      type: object
+      description: The response body for registering a patch artifact.
+      required: [id, patch_id, arch, platform, hash, size, url]
+      properties:
+        id: { type: integer, format: int64, description: "The ID of the artifact." }
+        patch_id: { type: integer, format: int64, description: "The ID of the patch." }
+        arch: { type: string, description: "The arch of the artifact." }
+        platform: { $ref: "#/components/schemas/ReleasePlatform", description: "The platform of the artifact." }
+        hash: { type: string, description: "The hash of the artifact." }
+        size: { type: integer, format: int64, description: "The size of the artifact in bytes." }
+        url: { type: string, description: "The upload URL for the artifact." }
+
+    CreateReleaseArtifactRequest:
+      type: object
+      description: |
+        Metadata for a new release artifact. POST to
+        /apps/{appId}/releases/{releaseId}/artifacts and use the
+        returned signed upload URL to upload the artifact bytes
+        separately.
+      required: [arch, platform, hash, size, filename]
+      properties:
+        arch:
+          type: string
+          description: "The arch of the artifact."
+        platform:
+          $ref: "#/components/schemas/ReleasePlatform"
+          description: "The platform of the artifact."
+        hash:
+          type: string
+          description: "The hash of the artifact."
+        filename:
+          type: string
+          description: "The name of the file."
+        can_sideload:
+          type: boolean
+          description: "Whether the artifact can installed and run on a device/emulator as-is."
+        size:
+          type: integer
+          format: int64
+          description: "The size of the artifact in bytes."
+        podfile_lock_hash:
+          type: string
+
+          description: "The hash of the Podfile.lock file used to create this artifact (iOS only)."
+    CreateReleaseArtifactResponse:
+      type: object
+      description: The response body for registering a release artifact.
+      required: [id, release_id, arch, platform, hash, size, url]
+      properties:
+        id: { type: integer, format: int64, description: "The ID of the artifact." }
+        release_id: { type: integer, format: int64, description: "The ID of the release." }
+        arch: { type: string, description: "The arch of the artifact." }
+        platform: { $ref: "#/components/schemas/ReleasePlatform", description: "The platform of the artifact." }
+        hash: { type: string, description: "The hash of the artifact." }
+        size: { type: integer, format: int64, description: "The size of the artifact in bytes." }
+        url: { type: string, description: "The upload URL for the artifact." }
+
+    UpdatePatchRequest:
+      type: object
+      description: |
+        The request body for PATCH
+        /apps/{appId}/releases/{releaseId}/patches/{patchId}.
+      properties:
+        notes:
+          type: string
+          description: |
+            Freeform notes about the patch. If null, notes are unchanged.
+
+    PromotePatchRequest:
+      type: object
+      description: The request body for POST /apps/{appId}/patches/promote.
+      required: [patch_id, channel_id]
+      properties:
+        patch_id:
+          type: integer
+          format: int64
+          description: "The ID of the patch."
+        channel_id:
+          type: integer
+          format: int64
+
+          description: "The ID of the channel."
+    PatchCheckRequest:
+      type: object
+      description: The request body for POST /patches/check.
+      required: [release_version, platform, arch, app_id, channel]
+      properties:
+        release_version:
+          type: string
+          description: The release version of the app.
+        patch_number:
+          type: integer
+          format: int64
+          description: |
+            The highest patch number the client has already downloaded.
+            If provided, the server only returns patches with a higher
+            number. If omitted, the server returns the latest available.
+        patch_hash:
+          type: string
+          description: The current patch hash of the app.
+        platform:
+          $ref: "#/components/schemas/ReleasePlatform"
+          description: "The platform of the app."
+        arch:
+          type: string
+          description: "The architecture of the app."
+        app_id:
+          type: string
+          description: "The ID of the app."
+        channel:
+          type: string
+          description: "The channel of the app."
+        client_id:
+          type: string
+          description: |
+            Unique device ID for the install, generated on device and
+            unique per app. Optional for backward compatibility.
+        current_patch_number:
+          type: integer
+          format: int64
+          description: |
+            The patch number currently running on the device, if any.
+            Supersedes `patch_number` for newer clients; unlike
+            `patch_number`, this does not affect the server's response.
+
+    PatchCheckResponse:
+      type: object
+      description: The response body for POST /patches/check.
+      required: [patch_available]
+      properties:
+        patch_available:
+          type: boolean
+          description: "Whether a patch is available."
+        patch:
+          $ref: "#/components/schemas/PatchCheckMetadata"
+          description: "The patch metadata."
+        rolled_back_patch_numbers:
+          type: array
+          items:
+            type: integer
+            format: int64
+
+          description: "The numbers of all patches that have been rolled back for the current release."
+    PatchCheckMetadata:
+      type: object
+      description: |
+        Patch metadata representing the contents of a patch for a
+        specific platform and architecture.
+      required: [number, download_url, hash]
+      properties:
+        number:
+          type: integer
+          format: int64
+          description: "The patch number associated with the artifact."
+        download_url:
+          type: string
+          description: "The URL of the artifact."
+        hash:
+          type: string
+          description: "The hash of the artifact."
+        hash_signature:
+          type: string
+          description: "The signature of the `hash`."
