@@ -1,0 +1,10 @@
+name: dashpod_workspace
+publish_to: none
+environment:
+  sdk: ^3.6.0
+workspace:
+  - packages/dashpod
+  - packages/dashpod_api
+  - packages/dashpod_cli
+  - packages/dashpod_delivery
+  - packages/dashpod_updater

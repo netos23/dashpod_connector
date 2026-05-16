@@ -6,6 +6,8 @@ version: 0.1.0
 environment:
   sdk: ^3.8.1
 
+resolution: workspace
+
 dependencies:
   ffi: ^2.1.0
   meta: ^1.9.1
