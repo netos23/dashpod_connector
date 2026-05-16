@@ -37,7 +37,7 @@ paths:
   /users:
     post:
       tags: [users]
-      summary: Create a new user.
+      summary: Create or return the current user.
       description: |
         Creates a new Dashpod user. Email is retrieved from the user's
         auth token; only the display name is provided in the body.
@@ -52,7 +52,7 @@ paths:
         default:
           $ref: "#/components/responses/Error"
         "200":
-          description: The newly-created user.
+          description: The created or existing user.
           content:
             application/json:
               schema:
@@ -1186,12 +1186,16 @@ components:
       type: object
       description: |
         The request body for POST /users. The user's email is taken
-        from the auth token; only the display name is provided here.
-      required: [name]
+        from the auth token; `name` sets the display name and
+        `organisationName` optionally overrides the personal org name.
+      required: [name, organisationName]
       properties:
         name:
           type: string
           description: The new user's display name.
+        organisationName:
+          type: string
+          description: Optional personal organization name. If omitted, the backend uses `name`.
 
     CreatePatchRequest:
       type: object
