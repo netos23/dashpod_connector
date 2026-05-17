@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'app_collaborators_api.dart';
+part of 'organizations_api.dart';
 
 // dart format off
 
@@ -10,8 +10,8 @@ part of 'app_collaborators_api.dart';
 
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main,avoid_redundant_argument_values
 
-class _AppCollaboratorsApi implements AppCollaboratorsApi {
-  _AppCollaboratorsApi(this._dio, {this.baseUrl, this.errorLogger});
+class _OrganizationsApi implements OrganizationsApi {
+  _OrganizationsApi(this._dio, {this.baseUrl, this.errorLogger});
 
   final Dio _dio;
 
@@ -20,25 +20,25 @@ class _AppCollaboratorsApi implements AppCollaboratorsApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<GetAppCollaboratorsResponseDto> list2(String appId) async {
+  Future<GetOrganizationUsersResponseDto> listUsers(int organizationId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<GetAppCollaboratorsResponseDto>(
+    final _options = _setStreamType<GetOrganizationUsersResponseDto>(
       Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/apps/${appId}/collaborators',
+            '/api/v1/organizations/${organizationId}/users',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late GetAppCollaboratorsResponseDto _value;
+    late GetOrganizationUsersResponseDto _value;
     try {
-      _value = GetAppCollaboratorsResponseDto.fromJson(_result.data!);
+      _value = GetOrganizationUsersResponseDto.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;
@@ -47,74 +47,56 @@ class _AppCollaboratorsApi implements AppCollaboratorsApi {
   }
 
   @override
-  Future<dynamic> add(
-    String appId,
-    CreateAppCollaboratorRequestDto createAppCollaboratorRequestDto,
-  ) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(createAppCollaboratorRequestDto.toJson());
-    final _options = _setStreamType<dynamic>(
-      Options(method: 'POST', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/api/v1/apps/${appId}/collaborators',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch(_options);
-    final _value = _result.data;
-    return _value;
-  }
-
-  @override
-  Future<dynamic> remove(String appId, int collaboratorId) async {
+  Future<GetOrganizationAppsResponseDto> listApps(int organizationId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
-    final _options = _setStreamType<dynamic>(
-      Options(method: 'DELETE', headers: _headers, extra: _extra)
+    final _options = _setStreamType<GetOrganizationAppsResponseDto>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/apps/${appId}/collaborators/${collaboratorId}',
+            '/api/v1/organizations/${organizationId}/apps',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch(_options);
-    final _value = _result.data;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late GetOrganizationAppsResponseDto _value;
+    try {
+      _value = GetOrganizationAppsResponseDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
     return _value;
   }
 
   @override
-  Future<dynamic> update2(
-    String appId,
-    int collaboratorId,
-    UpdateAppCollaboratorRequestDto updateAppCollaboratorRequestDto,
-  ) async {
+  Future<GetOrganizationsResponseDto> list5() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(updateAppCollaboratorRequestDto.toJson());
-    final _options = _setStreamType<dynamic>(
-      Options(method: 'PATCH', headers: _headers, extra: _extra)
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<GetOrganizationsResponseDto>(
+      Options(method: 'GET', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/api/v1/apps/${appId}/collaborators/${collaboratorId}',
+            '/api/v1/organizations',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
-    final _result = await _dio.fetch(_options);
-    final _value = _result.data;
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late GetOrganizationsResponseDto _value;
+    try {
+      _value = GetOrganizationsResponseDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
     return _value;
   }
 

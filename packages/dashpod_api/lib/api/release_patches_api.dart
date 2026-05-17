@@ -19,7 +19,7 @@ abstract class ReleasePatchesApi {
   );
 
   @GET('/api/v1/apps/{appId}/releases/{releaseId}/patches')
-  Future<GetReleasePatchesResponseDto> list4(
+  Future<GetReleasePatchesResponseDto> list6(
     @Path('appId') String appId,
     @Path('releaseId') int releaseId,
   );

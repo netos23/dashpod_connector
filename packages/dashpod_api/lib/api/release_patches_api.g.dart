@@ -47,7 +47,7 @@ class _ReleasePatchesApi implements ReleasePatchesApi {
   }
 
   @override
-  Future<GetReleasePatchesResponseDto> list4(
+  Future<GetReleasePatchesResponseDto> list6(
     String appId,
     int releaseId,
   ) async {

@@ -12,7 +12,7 @@ abstract class AppsApi {
   factory AppsApi(Dio dio) => _AppsApi(dio);
 
   @GET('/api/v1/apps')
-  Future<GetAppsResponseDto> list3();
+  Future<GetAppsResponseDto> list4();
 
   @POST('/api/v1/apps')
   Future<AppDto> create5(@Body() CreateAppRequestDto createAppRequestDto);
