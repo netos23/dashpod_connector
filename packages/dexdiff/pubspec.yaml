@@ -1,0 +1,15 @@
+name: dexdiff
+description: DEX binary parser and semantic differ for Android Dalvik Executable files.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  meta: ^1.16.0
+  path: ^1.9.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6
