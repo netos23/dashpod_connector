@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreatePatchRequestDto {
-  const CreatePatchRequestDto({this.releaseId, this.metadata});
+  CreatePatchRequestDto({this.releaseId, this.metadata});
 
   /// Converts a `Map<String, dynamic>` to a [CreatePatchRequestDto].
   factory CreatePatchRequestDto.fromJson(Map<String, dynamic> json) {
@@ -11,9 +11,9 @@ class CreatePatchRequestDto {
       'CreatePatchRequestDto',
       json,
       () => CreatePatchRequestDto(
-        releaseId: json['releaseId'] as int?,
+        releaseId: (json['releaseId'] as int?),
         metadata: (json['metadata'] as Map<String, dynamic>?)?.map(
-          MapEntry.new,
+          (key, value) => MapEntry(key, value),
         ),
       ),
     );

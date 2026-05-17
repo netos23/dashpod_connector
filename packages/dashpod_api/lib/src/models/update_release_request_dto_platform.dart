@@ -35,5 +35,5 @@ enum UpdateReleaseRequestDtoPlatform {
 
   /// Returns the string form of the enum.
   @override
-  String toString() => value;
+  String toString() => value.toString();
 }

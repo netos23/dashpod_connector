@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class PromotePatchRequestDto {
-  const PromotePatchRequestDto({this.patchId, this.channelId});
+  PromotePatchRequestDto({this.patchId, this.channelId});
 
   /// Converts a `Map<String, dynamic>` to a [PromotePatchRequestDto].
   factory PromotePatchRequestDto.fromJson(Map<String, dynamic> json) {
@@ -11,8 +11,8 @@ class PromotePatchRequestDto {
       'PromotePatchRequestDto',
       json,
       () => PromotePatchRequestDto(
-        patchId: json['patchId'] as int?,
-        channelId: json['channelId'] as int?,
+        patchId: (json['patchId'] as int?),
+        channelId: (json['channelId'] as int?),
       ),
     );
   }

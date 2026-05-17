@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class PatchPayloadDto {
-  const PatchPayloadDto({
+  PatchPayloadDto({
     this.number,
     this.downloadUrl,
     this.hash,
@@ -16,7 +16,7 @@ class PatchPayloadDto {
       'PatchPayloadDto',
       json,
       () => PatchPayloadDto(
-        number: json['number'] as int?,
+        number: (json['number'] as int?),
         downloadUrl: json['downloadUrl'] as String?,
         hash: json['hash'] as String?,
         hashSignature: json['hashSignature'] as String?,

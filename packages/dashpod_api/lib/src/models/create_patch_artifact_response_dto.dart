@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreatePatchArtifactResponseDto {
-  const CreatePatchArtifactResponseDto({
+  CreatePatchArtifactResponseDto({
     this.id,
     this.patchId,
     this.arch,
@@ -20,14 +20,14 @@ class CreatePatchArtifactResponseDto {
       'CreatePatchArtifactResponseDto',
       json,
       () => CreatePatchArtifactResponseDto(
-        id: json['id'] as int?,
-        patchId: json['patchId'] as int?,
+        id: (json['id'] as int?),
+        patchId: (json['patchId'] as int?),
         arch: json['arch'] as String?,
         platform: CreatePatchArtifactResponseDtoPlatform.maybeFromJson(
           json['platform'] as String?,
         ),
         hash: json['hash'] as String?,
-        size: json['size'] as int?,
+        size: (json['size'] as int?),
         url: json['url'] as String?,
       ),
     );

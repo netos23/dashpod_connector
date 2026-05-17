@@ -6,7 +6,7 @@ void main() {
   group('PatchCheckRequestDtoArch', () {
     test('round-trips via maybeFromJson/toJson', () {
       final instance = PatchCheckRequestDtoArch.values.first;
-      final parsed = PatchCheckRequestDtoArch.maybeFromJson(instance.toJson());
+      final parsed = PatchCheckRequestDtoArch.maybeFromJson(instance.toJson())!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

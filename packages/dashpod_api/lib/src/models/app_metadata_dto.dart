@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class AppMetadataDto {
-  const AppMetadataDto({
+  AppMetadataDto({
     this.appId,
     this.displayName,
     this.createdAt,
@@ -23,7 +23,7 @@ class AppMetadataDto {
         createdAt: maybeParseDateTime(json['createdAt'] as String?),
         updatedAt: maybeParseDateTime(json['updatedAt'] as String?),
         latestReleaseVersion: json['latestReleaseVersion'] as String?,
-        latestPatchNumber: json['latestPatchNumber'] as int?,
+        latestPatchNumber: (json['latestPatchNumber'] as int?),
       ),
     );
   }

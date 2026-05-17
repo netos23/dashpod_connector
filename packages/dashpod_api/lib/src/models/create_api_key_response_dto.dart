@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreateApiKeyResponseDto {
-  const CreateApiKeyResponseDto({this.key, this.token});
+  CreateApiKeyResponseDto({this.key, this.token});
 
   /// Converts a `Map<String, dynamic>` to a [CreateApiKeyResponseDto].
   factory CreateApiKeyResponseDto.fromJson(Map<String, dynamic> json) {

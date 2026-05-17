@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreateReleaseArtifactRequestDto {
-  const CreateReleaseArtifactRequestDto({
+  CreateReleaseArtifactRequestDto({
     this.arch,
     this.platform,
     this.hash,
@@ -26,7 +26,7 @@ class CreateReleaseArtifactRequestDto {
         ),
         hash: json['hash'] as String?,
         filename: json['filename'] as String?,
-        size: json['size'] as int?,
+        size: (json['size'] as int?),
         canSideload: json['canSideload'] as bool?,
         podfileLockHash: json['podfileLockHash'] as String?,
       ),

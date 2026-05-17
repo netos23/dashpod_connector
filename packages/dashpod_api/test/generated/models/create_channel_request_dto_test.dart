@@ -6,7 +6,7 @@ void main() {
   group('CreateChannelRequestDto', () {
     test('round-trips via maybeFromJson/toJson', () {
       final instance = CreateChannelRequestDto();
-      final parsed = CreateChannelRequestDto.maybeFromJson(instance.toJson());
+      final parsed = CreateChannelRequestDto.maybeFromJson(instance.toJson())!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

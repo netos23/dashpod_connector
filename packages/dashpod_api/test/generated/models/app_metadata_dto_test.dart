@@ -6,7 +6,7 @@ void main() {
   group('AppMetadataDto', () {
     test('round-trips via maybeFromJson/toJson', () {
       final instance = AppMetadataDto();
-      final parsed = AppMetadataDto.maybeFromJson(instance.toJson());
+      final parsed = AppMetadataDto.maybeFromJson(instance.toJson())!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

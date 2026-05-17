@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreatePatchEventRequestDto {
-  const CreatePatchEventRequestDto({this.event});
+  CreatePatchEventRequestDto({this.event});
 
   /// Converts a `Map<String, dynamic>` to a [CreatePatchEventRequestDto].
   factory CreatePatchEventRequestDto.fromJson(Map<String, dynamic> json) {

@@ -6,7 +6,7 @@ void main() {
   group('ListArtifactsParameter3', () {
     test('round-trips via maybeFromJson/toJson', () {
       final instance = ListArtifactsParameter3.values.first;
-      final parsed = ListArtifactsParameter3.maybeFromJson(instance.toJson());
+      final parsed = ListArtifactsParameter3.maybeFromJson(instance.toJson())!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

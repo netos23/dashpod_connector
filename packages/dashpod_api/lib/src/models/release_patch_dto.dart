@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class ReleasePatchDto {
-  const ReleasePatchDto({
+  ReleasePatchDto({
     this.id,
     this.number,
     this.artifacts,
@@ -19,8 +19,8 @@ class ReleasePatchDto {
       'ReleasePatchDto',
       json,
       () => ReleasePatchDto(
-        id: json['id'] as int?,
-        number: json['number'] as int?,
+        id: (json['id'] as int?),
+        number: (json['number'] as int?),
         artifacts: (json['artifacts'] as List?)
             ?.map<PatchArtifactDto>(
               (e) => PatchArtifactDto.fromJson(e as Map<String, dynamic>),

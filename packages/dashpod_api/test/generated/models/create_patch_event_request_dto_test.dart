@@ -8,7 +8,7 @@ void main() {
       final instance = CreatePatchEventRequestDto();
       final parsed = CreatePatchEventRequestDto.maybeFromJson(
         instance.toJson(),
-      );
+      )!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

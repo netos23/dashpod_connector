@@ -8,7 +8,7 @@ void main() {
       final instance = CreatePatchArtifactResponseDtoPlatform.values.first;
       final parsed = CreatePatchArtifactResponseDtoPlatform.maybeFromJson(
         instance.toJson(),
-      );
+      )!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

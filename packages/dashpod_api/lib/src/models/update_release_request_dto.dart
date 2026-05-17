@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class UpdateReleaseRequestDto {
-  const UpdateReleaseRequestDto({
+  UpdateReleaseRequestDto({
     this.status,
     this.platform,
     this.notes,
@@ -26,7 +26,7 @@ class UpdateReleaseRequestDto {
         ),
         notes: json['notes'] as String?,
         metadata: (json['metadata'] as Map<String, dynamic>?)?.map(
-          MapEntry.new,
+          (key, value) => MapEntry(key, value),
         ),
       ),
     );

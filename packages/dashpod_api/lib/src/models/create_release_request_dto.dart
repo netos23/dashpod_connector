@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreateReleaseRequestDto {
-  const CreateReleaseRequestDto({
+  CreateReleaseRequestDto({
     this.version,
     this.flutterRevision,
     this.flutterVersion,

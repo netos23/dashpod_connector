@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class UpdatePatchRequestDto {
-  const UpdatePatchRequestDto({this.notes});
+  UpdatePatchRequestDto({this.notes});
 
   /// Converts a `Map<String, dynamic>` to a [UpdatePatchRequestDto].
   factory UpdatePatchRequestDto.fromJson(Map<String, dynamic> json) {

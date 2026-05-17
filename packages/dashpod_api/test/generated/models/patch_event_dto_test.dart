@@ -6,7 +6,7 @@ void main() {
   group('PatchEventDto', () {
     test('round-trips via maybeFromJson/toJson', () {
       final instance = PatchEventDto();
-      final parsed = PatchEventDto.maybeFromJson(instance.toJson());
+      final parsed = PatchEventDto.maybeFromJson(instance.toJson())!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

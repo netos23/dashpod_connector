@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class ChannelDto {
-  const ChannelDto({this.id, this.appId, this.name});
+  ChannelDto({this.id, this.appId, this.name});
 
   /// Converts a `Map<String, dynamic>` to a [ChannelDto].
   factory ChannelDto.fromJson(Map<String, dynamic> json) {
@@ -11,7 +11,7 @@ class ChannelDto {
       'ChannelDto',
       json,
       () => ChannelDto(
-        id: json['id'] as int?,
+        id: (json['id'] as int?),
         appId: json['appId'] as String?,
         name: json['name'] as String?,
       ),

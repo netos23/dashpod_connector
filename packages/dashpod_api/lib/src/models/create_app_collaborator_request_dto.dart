@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreateAppCollaboratorRequestDto {
-  const CreateAppCollaboratorRequestDto({this.email});
+  CreateAppCollaboratorRequestDto({this.email});
 
   /// Converts a `Map<String, dynamic>` to a [CreateAppCollaboratorRequestDto].
   factory CreateAppCollaboratorRequestDto.fromJson(Map<String, dynamic> json) {

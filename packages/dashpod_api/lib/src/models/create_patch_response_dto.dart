@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreatePatchResponseDto {
-  const CreatePatchResponseDto({this.id, this.number});
+  CreatePatchResponseDto({this.id, this.number});
 
   /// Converts a `Map<String, dynamic>` to a [CreatePatchResponseDto].
   factory CreatePatchResponseDto.fromJson(Map<String, dynamic> json) {
@@ -11,8 +11,8 @@ class CreatePatchResponseDto {
       'CreatePatchResponseDto',
       json,
       () => CreatePatchResponseDto(
-        id: json['id'] as int?,
-        number: json['number'] as int?,
+        id: (json['id'] as int?),
+        number: (json['number'] as int?),
       ),
     );
   }

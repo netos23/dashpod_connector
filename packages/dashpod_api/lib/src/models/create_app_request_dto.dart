@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreateAppRequestDto {
-  const CreateAppRequestDto({this.displayName, this.organizationId});
+  CreateAppRequestDto({this.displayName, this.organizationId});
 
   /// Converts a `Map<String, dynamic>` to a [CreateAppRequestDto].
   factory CreateAppRequestDto.fromJson(Map<String, dynamic> json) {
@@ -12,7 +12,7 @@ class CreateAppRequestDto {
       json,
       () => CreateAppRequestDto(
         displayName: json['displayName'] as String?,
-        organizationId: json['organizationId'] as int?,
+        organizationId: (json['organizationId'] as int?),
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreateChannelRequestDto {
-  const CreateChannelRequestDto({this.channel});
+  CreateChannelRequestDto({this.channel});
 
   /// Converts a `Map<String, dynamic>` to a [CreateChannelRequestDto].
   factory CreateChannelRequestDto.fromJson(Map<String, dynamic> json) {

@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreateApiKeyRequestDto {
-  const CreateApiKeyRequestDto({this.name, this.expiresAt});
+  CreateApiKeyRequestDto({this.name, this.expiresAt});
 
   /// Converts a `Map<String, dynamic>` to a [CreateApiKeyRequestDto].
   factory CreateApiKeyRequestDto.fromJson(Map<String, dynamic> json) {

@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class CreatePatchArtifactRequestDto {
-  const CreatePatchArtifactRequestDto({
+  CreatePatchArtifactRequestDto({
     this.arch,
     this.platform,
     this.hash,
@@ -24,7 +24,7 @@ class CreatePatchArtifactRequestDto {
           json['platform'] as String?,
         ),
         hash: json['hash'] as String?,
-        size: json['size'] as int?,
+        size: (json['size'] as int?),
         hashSignature: json['hashSignature'] as String?,
         podfileLockHash: json['podfileLockHash'] as String?,
       ),

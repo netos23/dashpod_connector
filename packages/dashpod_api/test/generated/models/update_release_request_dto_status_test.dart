@@ -8,7 +8,7 @@ void main() {
       final instance = UpdateReleaseRequestDtoStatus.values.first;
       final parsed = UpdateReleaseRequestDtoStatus.maybeFromJson(
         instance.toJson(),
-      );
+      )!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

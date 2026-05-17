@@ -8,7 +8,7 @@ void main() {
       final instance = PatchCheckRequestDtoPlatform.values.first;
       final parsed = PatchCheckRequestDtoPlatform.maybeFromJson(
         instance.toJson(),
-      );
+      )!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

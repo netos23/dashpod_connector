@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class ReleaseArtifactDto {
-  const ReleaseArtifactDto({
+  ReleaseArtifactDto({
     this.id,
     this.releaseId,
     this.arch,
@@ -22,14 +22,14 @@ class ReleaseArtifactDto {
       'ReleaseArtifactDto',
       json,
       () => ReleaseArtifactDto(
-        id: json['id'] as int?,
-        releaseId: json['releaseId'] as int?,
+        id: (json['id'] as int?),
+        releaseId: (json['releaseId'] as int?),
         arch: json['arch'] as String?,
         platform: ReleaseArtifactDtoPlatform.maybeFromJson(
           json['platform'] as String?,
         ),
         hash: json['hash'] as String?,
-        size: json['size'] as int?,
+        size: (json['size'] as int?),
         url: json['url'] as String?,
         canSideload: json['canSideload'] as bool?,
         podfileLockHash: json['podfileLockHash'] as String?,

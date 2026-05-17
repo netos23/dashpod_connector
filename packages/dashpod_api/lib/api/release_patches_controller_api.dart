@@ -1,71 +1,27 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'package:dashpod_api/api_client.dart';
-import 'package:dashpod_api/api_exception.dart';
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
 import 'package:dashpod_api/src/models/get_release_patches_response_dto.dart';
 import 'package:dashpod_api/src/models/update_patch_request_dto.dart';
 
+part 'release_patches_controller_api.g.dart';
+
 /// Endpoints with tag release-patches-controller
-class ReleasePatchesControllerApi {
-  ReleasePatchesControllerApi(ApiClient? client)
-    : client = client ?? ApiClient();
+@RestApi()
+abstract class ReleasePatchesControllerApi {
+  factory ReleasePatchesControllerApi(Dio dio) =>
+      _ReleasePatchesControllerApi(dio);
 
-  final ApiClient client;
-
+  @PATCH('/api/v1/apps/{appId}/releases/{releaseId}/patches/{patchId}')
   Future<dynamic> update(
-    String appId,
-    int releaseId,
-    int patchId,
-    UpdatePatchRequestDto updatePatchRequestDto,
-  ) async {
-    final response = await client.invokeApi(
-      method: Method.patch,
-      path: '/api/v1/apps/{appId}/releases/{releaseId}/patches/{patchId}'
-          .replaceAll('{appId}', appId)
-          .replaceAll('{releaseId}', '$releaseId')
-          .replaceAll('{patchId}', '$patchId'),
-      body: updatePatchRequestDto.toJson(),
-    );
+    @Path('appId') String appId,
+    @Path('releaseId') int releaseId,
+    @Path('patchId') int patchId,
+    @Body() UpdatePatchRequestDto updatePatchRequestDto,
+  );
 
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return jsonDecode(response.body);
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
-
+  @GET('/api/v1/apps/{appId}/releases/{releaseId}/patches')
   Future<GetReleasePatchesResponseDto> list4(
-    String appId,
-    int releaseId,
-  ) async {
-    final response = await client.invokeApi(
-      method: Method.get,
-      path: '/api/v1/apps/{appId}/releases/{releaseId}/patches'
-          .replaceAll('{appId}', appId)
-          .replaceAll('{releaseId}', '$releaseId'),
-    );
-
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return GetReleasePatchesResponseDto.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>,
-      );
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
+    @Path('appId') String appId,
+    @Path('releaseId') int releaseId,
+  );
 }

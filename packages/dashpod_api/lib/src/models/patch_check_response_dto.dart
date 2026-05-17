@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class PatchCheckResponseDto {
-  const PatchCheckResponseDto({
+  PatchCheckResponseDto({
     this.patchAvailable,
     this.patch,
     this.rolledBackPatchNumbers,

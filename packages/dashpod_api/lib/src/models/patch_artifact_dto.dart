@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class PatchArtifactDto {
-  const PatchArtifactDto({
+  PatchArtifactDto({
     this.id,
     this.patchId,
     this.arch,
@@ -20,14 +20,14 @@ class PatchArtifactDto {
       'PatchArtifactDto',
       json,
       () => PatchArtifactDto(
-        id: json['id'] as int?,
-        patchId: json['patchId'] as int?,
+        id: (json['id'] as int?),
+        patchId: (json['patchId'] as int?),
         arch: json['arch'] as String?,
         platform: PatchArtifactDtoPlatform.maybeFromJson(
           json['platform'] as String?,
         ),
         hash: json['hash'] as String?,
-        size: json['size'] as int?,
+        size: (json['size'] as int?),
         createdAt: maybeParseDateTime(json['createdAt'] as String?),
       ),
     );

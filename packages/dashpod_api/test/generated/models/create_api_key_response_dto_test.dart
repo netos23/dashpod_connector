@@ -6,7 +6,7 @@ void main() {
   group('CreateApiKeyResponseDto', () {
     test('round-trips via maybeFromJson/toJson', () {
       final instance = CreateApiKeyResponseDto();
-      final parsed = CreateApiKeyResponseDto.maybeFromJson(instance.toJson());
+      final parsed = CreateApiKeyResponseDto.maybeFromJson(instance.toJson())!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

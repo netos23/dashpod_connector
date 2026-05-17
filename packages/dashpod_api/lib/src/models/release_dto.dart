@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class ReleaseDto {
-  const ReleaseDto({
+  ReleaseDto({
     this.id,
     this.appId,
     this.version,
@@ -23,7 +23,7 @@ class ReleaseDto {
       'ReleaseDto',
       json,
       () => ReleaseDto(
-        id: json['id'] as int?,
+        id: (json['id'] as int?),
         appId: json['appId'] as String?,
         version: json['version'] as String?,
         flutterRevision: json['flutterRevision'] as String?,

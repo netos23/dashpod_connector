@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class UserDto {
-  const UserDto({
+  UserDto({
     this.id,
     this.email,
     this.jwtIssuer,
@@ -19,13 +19,13 @@ class UserDto {
       'UserDto',
       json,
       () => UserDto(
-        id: json['id'] as int?,
+        id: (json['id'] as int?),
         email: json['email'] as String?,
         jwtIssuer: json['jwtIssuer'] as String?,
         hasActiveSubscription: json['hasActiveSubscription'] as bool?,
         displayName: json['displayName'] as String?,
         stripeCustomerId: json['stripeCustomerId'] as String?,
-        patchOverageLimit: json['patchOverageLimit'] as int?,
+        patchOverageLimit: (json['patchOverageLimit'] as int?),
       ),
     );
   }

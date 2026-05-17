@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class GetReleaseArtifactsResponseDto {
-  const GetReleaseArtifactsResponseDto({this.artifacts});
+  GetReleaseArtifactsResponseDto({this.artifacts});
 
   /// Converts a `Map<String, dynamic>` to a [GetReleaseArtifactsResponseDto].
   factory GetReleaseArtifactsResponseDto.fromJson(Map<String, dynamic> json) {

@@ -6,7 +6,7 @@ void main() {
   group('PatchArtifactDto', () {
     test('round-trips via maybeFromJson/toJson', () {
       final instance = PatchArtifactDto();
-      final parsed = PatchArtifactDto.maybeFromJson(instance.toJson());
+      final parsed = PatchArtifactDto.maybeFromJson(instance.toJson())!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

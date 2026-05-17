@@ -1,36 +1,16 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'package:dashpod_api/api_client.dart';
-import 'package:dashpod_api/api_exception.dart';
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
 import 'package:dashpod_api/src/models/create_patch_event_request_dto.dart';
 
+part 'patch_events_controller_api.g.dart';
+
 /// Endpoints with tag patch-events-controller
-class PatchEventsControllerApi {
-  PatchEventsControllerApi(ApiClient? client) : client = client ?? ApiClient();
+@RestApi()
+abstract class PatchEventsControllerApi {
+  factory PatchEventsControllerApi(Dio dio) => _PatchEventsControllerApi(dio);
 
-  final ApiClient client;
-
+  @POST('/api/v1/patches/events')
   Future<dynamic> report(
-    CreatePatchEventRequestDto createPatchEventRequestDto,
-  ) async {
-    final response = await client.invokeApi(
-      method: Method.post,
-      path: '/api/v1/patches/events',
-      body: createPatchEventRequestDto.toJson(),
-    );
-
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return jsonDecode(response.body);
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
+    @Body() CreatePatchEventRequestDto createPatchEventRequestDto,
+  );
 }

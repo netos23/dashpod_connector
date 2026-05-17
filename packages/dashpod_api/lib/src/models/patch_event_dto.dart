@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class PatchEventDto {
-  const PatchEventDto({
+  PatchEventDto({
     this.appId,
     this.arch,
     this.clientId,
@@ -26,10 +26,10 @@ class PatchEventDto {
         arch: json['arch'] as String?,
         clientId: json['clientId'] as String?,
         type: PatchEventDtoType.maybeFromJson(json['type'] as String?),
-        patchNumber: json['patchNumber'] as int?,
+        patchNumber: (json['patchNumber'] as int?),
         platform: json['platform'] as String?,
         releaseVersion: json['releaseVersion'] as String?,
-        timestamp: json['timestamp'] as int?,
+        timestamp: (json['timestamp'] as int?),
         message: json['message'] as String?,
       ),
     );

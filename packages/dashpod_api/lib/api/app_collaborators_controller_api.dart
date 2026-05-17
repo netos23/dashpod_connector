@@ -1,69 +1,26 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'package:dashpod_api/api_client.dart';
-import 'package:dashpod_api/api_exception.dart';
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
 import 'package:dashpod_api/src/models/create_app_collaborator_request_dto.dart';
 import 'package:dashpod_api/src/models/update_app_collaborator_request_dto.dart';
 
+part 'app_collaborators_controller_api.g.dart';
+
 /// Endpoints with tag app-collaborators-controller
-class AppCollaboratorsControllerApi {
-  AppCollaboratorsControllerApi(ApiClient? client)
-    : client = client ?? ApiClient();
+@RestApi()
+abstract class AppCollaboratorsControllerApi {
+  factory AppCollaboratorsControllerApi(Dio dio) =>
+      _AppCollaboratorsControllerApi(dio);
 
-  final ApiClient client;
-
+  @POST('/api/v1/apps/{appId}/collaborators')
   Future<dynamic> add(
-    String appId,
-    CreateAppCollaboratorRequestDto createAppCollaboratorRequestDto,
-  ) async {
-    final response = await client.invokeApi(
-      method: Method.post,
-      path: '/api/v1/apps/{appId}/collaborators'.replaceAll(
-        '{appId}',
-        appId,
-      ),
-      body: createAppCollaboratorRequestDto.toJson(),
-    );
+    @Path('appId') String appId,
+    @Body() CreateAppCollaboratorRequestDto createAppCollaboratorRequestDto,
+  );
 
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return jsonDecode(response.body);
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
-
+  @PATCH('/api/v1/apps/{appId}/collaborators/{collaboratorId}')
   Future<dynamic> update2(
-    String appId,
-    int collaboratorId,
-    UpdateAppCollaboratorRequestDto updateAppCollaboratorRequestDto,
-  ) async {
-    final response = await client.invokeApi(
-      method: Method.patch,
-      path: '/api/v1/apps/{appId}/collaborators/{collaboratorId}'
-          .replaceAll('{appId}', appId)
-          .replaceAll('{collaboratorId}', '$collaboratorId'),
-      body: updateAppCollaboratorRequestDto.toJson(),
-    );
-
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return jsonDecode(response.body);
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
+    @Path('appId') String appId,
+    @Path('collaboratorId') int collaboratorId,
+    @Body() UpdateAppCollaboratorRequestDto updateAppCollaboratorRequestDto,
+  );
 }

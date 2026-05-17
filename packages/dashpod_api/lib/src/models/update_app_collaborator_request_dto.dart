@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class UpdateAppCollaboratorRequestDto {
-  const UpdateAppCollaboratorRequestDto({this.role});
+  UpdateAppCollaboratorRequestDto({this.role});
 
   /// Converts a `Map<String, dynamic>` to a [UpdateAppCollaboratorRequestDto].
   factory UpdateAppCollaboratorRequestDto.fromJson(Map<String, dynamic> json) {

@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class PatchCheckRequestDto {
-  const PatchCheckRequestDto({
+  PatchCheckRequestDto({
     this.appId,
     this.channel,
     this.releaseVersion,
@@ -29,7 +29,7 @@ class PatchCheckRequestDto {
         ),
         arch: PatchCheckRequestDtoArch.maybeFromJson(json['arch'] as String?),
         clientId: json['clientId'] as String?,
-        currentPatchNumber: json['currentPatchNumber'] as int?,
+        currentPatchNumber: (json['currentPatchNumber'] as int?),
       ),
     );
   }

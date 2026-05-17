@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class GetAppsResponseDto {
-  const GetAppsResponseDto({this.apps});
+  GetAppsResponseDto({this.apps});
 
   /// Converts a `Map<String, dynamic>` to a [GetAppsResponseDto].
   factory GetAppsResponseDto.fromJson(Map<String, dynamic> json) {

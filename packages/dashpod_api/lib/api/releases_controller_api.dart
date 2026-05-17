@@ -1,8 +1,5 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-import 'package:dashpod_api/api_client.dart';
-import 'package:dashpod_api/api_exception.dart';
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
 import 'package:dashpod_api/src/models/create_release_artifact_request_dto.dart';
 import 'package:dashpod_api/src/models/create_release_artifact_response_dto.dart';
 import 'package:dashpod_api/src/models/create_release_request_dto.dart';
@@ -13,176 +10,50 @@ import 'package:dashpod_api/src/models/get_releases_response_dto.dart';
 import 'package:dashpod_api/src/models/list_artifacts_parameter3.dart';
 import 'package:dashpod_api/src/models/update_release_request_dto.dart';
 
+part 'releases_controller_api.g.dart';
+
 /// Endpoints with tag releases-controller
-class ReleasesControllerApi {
-  ReleasesControllerApi(ApiClient? client) : client = client ?? ApiClient();
+@RestApi()
+abstract class ReleasesControllerApi {
+  factory ReleasesControllerApi(Dio dio) => _ReleasesControllerApi(dio);
 
-  final ApiClient client;
-
+  @GET('/api/v1/apps/{appId}/releases/{releaseId}/artifacts')
   Future<GetReleaseArtifactsResponseDto> listArtifacts(
-    String appId,
-    int releaseId, {
-    String? arch,
-    ListArtifactsParameter3? platform,
-  }) async {
-    final response = await client.invokeApi(
-      method: Method.get,
-      path: '/api/v1/apps/{appId}/releases/{releaseId}/artifacts'
-          .replaceAll('{appId}', appId)
-          .replaceAll('{releaseId}', '$releaseId'),
-      queryParameters: {
-        if (arch != null) 'arch': [arch],
-        if (platform != null) 'platform': [platform.toJson()],
-      },
-    );
+    @Path('appId') String appId,
+    @Path('releaseId') int releaseId,
+    @Query('arch') String? arch,
+    @Query('platform') ListArtifactsParameter3? platform,
+  );
 
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return GetReleaseArtifactsResponseDto.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>,
-      );
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
-
+  @POST('/api/v1/apps/{appId}/releases/{releaseId}/artifacts')
   Future<CreateReleaseArtifactResponseDto> createArtifact(
-    String appId,
-    int releaseId,
-    CreateReleaseArtifactRequestDto createReleaseArtifactRequestDto,
-  ) async {
-    final response = await client.invokeApi(
-      method: Method.post,
-      path: '/api/v1/apps/{appId}/releases/{releaseId}/artifacts'
-          .replaceAll('{appId}', appId)
-          .replaceAll('{releaseId}', '$releaseId'),
-      body: createReleaseArtifactRequestDto.toJson(),
-    );
+    @Path('appId') String appId,
+    @Path('releaseId') int releaseId,
+    @Body() CreateReleaseArtifactRequestDto createReleaseArtifactRequestDto,
+  );
 
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return CreateReleaseArtifactResponseDto.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>,
-      );
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
-
+  @GET('/api/v1/apps/{appId}/releases')
   Future<GetReleasesResponseDto> list1(
-    String appId, {
-    bool? sideloadable,
-  }) async {
-    final response = await client.invokeApi(
-      method: Method.get,
-      path: '/api/v1/apps/{appId}/releases'.replaceAll('{appId}', appId),
-      queryParameters: {
-        if (sideloadable != null) 'sideloadable': [sideloadable.toString()],
-      },
-    );
+    @Path('appId') String appId,
+    @Query('sideloadable') bool? sideloadable,
+  );
 
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return GetReleasesResponseDto.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>,
-      );
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
-
+  @POST('/api/v1/apps/{appId}/releases')
   Future<CreateReleaseResponseDto> create2(
-    String appId,
-    CreateReleaseRequestDto createReleaseRequestDto,
-  ) async {
-    final response = await client.invokeApi(
-      method: Method.post,
-      path: '/api/v1/apps/{appId}/releases'.replaceAll('{appId}', appId),
-      body: createReleaseRequestDto.toJson(),
-    );
+    @Path('appId') String appId,
+    @Body() CreateReleaseRequestDto createReleaseRequestDto,
+  );
 
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
+  @GET('/api/v1/apps/{appId}/releases/{releaseId}')
+  Future<GetReleaseResponseDto> get(
+    @Path('appId') String appId,
+    @Path('releaseId') int releaseId,
+  );
 
-    if (response.body.isNotEmpty) {
-      return CreateReleaseResponseDto.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>,
-      );
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
-
-  Future<GetReleaseResponseDto> get(String appId, int releaseId) async {
-    final response = await client.invokeApi(
-      method: Method.get,
-      path: '/api/v1/apps/{appId}/releases/{releaseId}'
-          .replaceAll('{appId}', appId)
-          .replaceAll('{releaseId}', '$releaseId'),
-    );
-
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return GetReleaseResponseDto.fromJson(
-        jsonDecode(response.body) as Map<String, dynamic>,
-      );
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
-
+  @PATCH('/api/v1/apps/{appId}/releases/{releaseId}')
   Future<dynamic> update1(
-    String appId,
-    int releaseId,
-    UpdateReleaseRequestDto updateReleaseRequestDto,
-  ) async {
-    final response = await client.invokeApi(
-      method: Method.patch,
-      path: '/api/v1/apps/{appId}/releases/{releaseId}'
-          .replaceAll('{appId}', appId)
-          .replaceAll('{releaseId}', '$releaseId'),
-      body: updateReleaseRequestDto.toJson(),
-    );
-
-    if (response.statusCode >= HttpStatus.badRequest) {
-      throw ApiException<Object?>(
-        response.statusCode,
-        response.body,
-      );
-    }
-
-    if (response.body.isNotEmpty) {
-      return jsonDecode(response.body);
-    }
-
-    throw ApiException<Object?>.unhandled(response.statusCode);
-  }
+    @Path('appId') String appId,
+    @Path('releaseId') int releaseId,
+    @Body() UpdateReleaseRequestDto updateReleaseRequestDto,
+  );
 }

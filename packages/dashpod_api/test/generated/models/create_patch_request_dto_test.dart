@@ -6,7 +6,7 @@ void main() {
   group('CreatePatchRequestDto', () {
     test('round-trips via maybeFromJson/toJson', () {
       final instance = CreatePatchRequestDto();
-      final parsed = CreatePatchRequestDto.maybeFromJson(instance.toJson());
+      final parsed = CreatePatchRequestDto.maybeFromJson(instance.toJson())!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

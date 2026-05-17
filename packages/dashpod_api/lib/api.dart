@@ -8,7 +8,6 @@ export 'package:dashpod_api/api/patches_controller_api.dart';
 export 'package:dashpod_api/api/release_patches_controller_api.dart';
 export 'package:dashpod_api/api/releases_controller_api.dart';
 export 'package:dashpod_api/api/users_controller_api.dart';
-export 'package:dashpod_api/api_client.dart';
 export 'package:dashpod_api/api_exception.dart';
 export 'package:dashpod_api/src/models/api_key_dto.dart';
 export 'package:dashpod_api/src/models/app_dto.dart';

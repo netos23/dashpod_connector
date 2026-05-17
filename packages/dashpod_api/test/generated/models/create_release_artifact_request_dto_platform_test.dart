@@ -8,7 +8,7 @@ void main() {
       final instance = CreateReleaseArtifactRequestDtoPlatform.values.first;
       final parsed = CreateReleaseArtifactRequestDtoPlatform.maybeFromJson(
         instance.toJson(),
-      );
+      )!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

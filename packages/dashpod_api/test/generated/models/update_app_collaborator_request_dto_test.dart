@@ -8,7 +8,7 @@ void main() {
       final instance = UpdateAppCollaboratorRequestDto();
       final parsed = UpdateAppCollaboratorRequestDto.maybeFromJson(
         instance.toJson(),
-      );
+      )!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

@@ -8,7 +8,7 @@ void main() {
       final instance = GetReleaseArtifactsResponseDto();
       final parsed = GetReleaseArtifactsResponseDto.maybeFromJson(
         instance.toJson(),
-      );
+      )!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });

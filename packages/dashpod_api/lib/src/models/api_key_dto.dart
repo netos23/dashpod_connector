@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class ApiKeyDto {
-  const ApiKeyDto({
+  ApiKeyDto({
     this.id,
     this.name,
     this.prefix,
@@ -19,7 +19,7 @@ class ApiKeyDto {
       'ApiKeyDto',
       json,
       () => ApiKeyDto(
-        id: json['id'] as int?,
+        id: (json['id'] as int?),
         name: json['name'] as String?,
         prefix: json['prefix'] as String?,
         createdAt: maybeParseDateTime(json['createdAt'] as String?),

@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 class AppDto {
-  const AppDto({this.id, this.displayName});
+  AppDto({this.id, this.displayName});
 
   /// Converts a `Map<String, dynamic>` to an [AppDto].
   factory AppDto.fromJson(Map<String, dynamic> json) {

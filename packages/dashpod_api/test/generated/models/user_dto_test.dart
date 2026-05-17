@@ -6,7 +6,7 @@ void main() {
   group('UserDto', () {
     test('round-trips via maybeFromJson/toJson', () {
       final instance = UserDto();
-      final parsed = UserDto.maybeFromJson(instance.toJson());
+      final parsed = UserDto.maybeFromJson(instance.toJson())!;
       expect(parsed, equals(instance));
       expect(parsed.hashCode, equals(instance.hashCode));
     });
