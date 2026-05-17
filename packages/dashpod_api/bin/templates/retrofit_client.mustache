@@ -1,0 +1,20 @@
+import 'package:dio/dio.dart';
+import 'package:retrofit/retrofit.dart';
+{{#imports}}
+import '{{{path}}}';
+{{/imports}}
+
+part '{{fileName}}.g.dart';
+
+/// {{{description}}}
+@RestApi()
+abstract class {{className}} {
+
+  factory {{className}}(Dio dio) => _{{className}}(dio);
+
+{{#endpoints}}
+  @{{httpMethod}}('{{{urlPath}}}')
+  Future<{{{returnType}}}> {{methodName}}({{#params}}{{{annotation}}} {{{type}}} {{dartName}},{{/params}});
+
+{{/endpoints}}
+}
