@@ -8,3 +8,4 @@ workspace:
   - packages/dashpod_cli
   - packages/dashpod_delivery
   - packages/dashpod_updater
+  - packages/dexdiff
