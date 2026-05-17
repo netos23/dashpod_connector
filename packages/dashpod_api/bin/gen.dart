@@ -6,24 +6,84 @@ import 'package:space_gen/src/render/templates.dart';
 class DashpodFileRenderer extends FileRenderer {
   DashpodFileRenderer(super.config);
 
-  // ── layout hooks ──────────────────────────────────────────────────────────
+  Uri? _serverUrl;
+
+  /// schema.snakeName → clean API group name (e.g. 'patch_check', 'releases')
+  final Map<String, String> _schemaApiGroup = {};
+
+  /// All clean API names and their singular forms, sorted longest-first for
+  /// greedy prefix matching in [modelPath].
+  final List<(String prefix, String group)> _apiPrefixes = [];
+
+  // ── API name helpers ────────────────────────────────────────────────────────
+
+  static String _cleanApiSnakeName(Api api) {
+    final name = api.snakeName;
+    const suffix = '_controller';
+    return name.endsWith(suffix)
+        ? name.substring(0, name.length - suffix.length)
+        : name;
+  }
+
+  String _apiFileName(Api api) => '${_cleanApiSnakeName(api)}_api';
+
+  String _apiFilePath(Api api) => 'lib/api/${_apiFileName(api)}.dart';
+
+  String _apiPackagePath(Api api) => 'api/${_apiFileName(api)}.dart';
+
+  // Strip 'Controller' from the PascalCase class name.
+  String _apiClassName(Api api) => api.className.replaceFirst('Controller', '');
+
+  // Simple singularization: drop 'es' for -ches/-shes/-xes/-zes, else drop 's'.
+  static String _singular(String name) {
+    if (name.endsWith('ches') ||
+        name.endsWith('shes') ||
+        name.endsWith('xes') ||
+        name.endsWith('zes')) {
+      return name.substring(0, name.length - 2);
+    }
+    if (name.endsWith('s')) return name.substring(0, name.length - 1);
+    return name;
+  }
+
+  // ── layout hooks ───────────────────────────────────────────────────────────
 
   @override
   String modelPath(LayoutContext context) {
     final snakeName = context.schema.snakeName;
-    final className = context.schema.typeName;
-    final isMessage =
-        className.endsWith('Request') || className.endsWith('Response');
-    if (!isMessage) return 'src/models/$snakeName.dart';
-    final base = _messageBaseName(snakeName);
-    if (context.operationSnakeNames.contains(base)) {
-      return 'src/messages/$base/$snakeName.dart';
+
+    // Direct mapping: schema was explicitly referenced by an endpoint.
+    final directApi = _schemaApiGroup[snakeName];
+    if (directApi != null) {
+      return 'src/models/$directApi/$snakeName.dart';
     }
-    return 'src/messages/$snakeName.dart';
+
+    // Tier 2: sub-schema — find the longest directly-mapped schema name that is
+    // a prefix of snakeName (e.g. patch_check_request_dto_arch → patch_check).
+    String? bestApi;
+    int bestLength = 0;
+    for (final entry in _schemaApiGroup.entries) {
+      if (snakeName.startsWith('${entry.key}_') &&
+          entry.key.length > bestLength) {
+        bestApi = entry.value;
+        bestLength = entry.key.length;
+      }
+    }
+    if (bestApi != null) {
+      return 'src/models/$bestApi/$snakeName.dart';
+    }
+
+    // Tier 3: API-name prefix — greedy longest match among all API clean names
+    // and their singular forms (e.g. 'releases' → also try 'release_').
+    for (final (prefix, group) in _apiPrefixes) {
+      if (snakeName.startsWith('${prefix}_') || snakeName == prefix) {
+        return 'src/models/$group/$snakeName.dart';
+      }
+    }
+
+    return 'src/models/$snakeName.dart';
   }
 
-  /// Route generated round-trip tests to `test/generated/` so they sit
-  /// alongside the hand-written tests at `test/src/` without colliding.
   @override
   String? testPath(LayoutContext context) {
     final modelRelative = modelPath(context);
@@ -34,25 +94,8 @@ class DashpodFileRenderer extends FileRenderer {
     return 'test/generated/$withSuffix';
   }
 
-  /// Tests import the hand-maintained top-level barrel.
   @override
   String testBarrelImport() => 'dashpod_api.dart';
-
-  /// Strip a trailing `_request`/`_response` (and any HTTP status code
-  /// inline-schema suffix) from [snake], returning the operation-name portion.
-  static String _messageBaseName(String snake) {
-    for (final suffix in const ['_request', '_response']) {
-      if (snake.endsWith(suffix)) {
-        var base = snake.substring(0, snake.length - suffix.length);
-        final match = RegExp(r'\d+$').firstMatch(base);
-        if (match != null) {
-          base = base.substring(0, match.start);
-        }
-        return base;
-      }
-    }
-    return snake;
-  }
 
   // ── scaffolding no-ops (hand-maintained files) ────────────────────────────
 
@@ -74,11 +117,9 @@ class DashpodFileRenderer extends FileRenderer {
   @override
   void renderApiException() {}
 
-  /// Retrofit + Dio replace the generated HTTP client.
   @override
   void renderApiClient(RenderSpec spec) {}
 
-  /// Injectable handles client instantiation; no Dashpod facade needed.
   @override
   void renderClient(List<Api> apis, {required String specName}) {}
 
@@ -86,10 +127,8 @@ class DashpodFileRenderer extends FileRenderer {
 
   @override
   void render(RenderSpec spec, {bool clearDirectory = true}) {
+    _serverUrl = spec.serverUrl;
     if (clearDirectory) {
-      // Delete files that were generated by the old HTTP-client pipeline and
-      // are no longer emitted in Retrofit mode (renderClient / renderApiClient
-      // are no-ops here). Leaving them produces stale-reference compile errors.
       for (final stale in const [
         'lib/client.dart',
         'lib/api_client.dart',
@@ -98,82 +137,137 @@ class DashpodFileRenderer extends FileRenderer {
         final file = fileWriter.fs.file('${fileWriter.outDir.path}/$stale');
         if (file.existsSync()) file.deleteSync();
       }
+      // Base clearDirectory doesn't know about lib/src/; clear it here so
+      // stale files from old layouts don't linger.
+      for (final dir in const ['lib/src/models', 'lib/src/messages']) {
+        final d = fileWriter.fs.directory('${fileWriter.outDir.path}/$dir');
+        if (d.existsSync()) d.deleteSync(recursive: true);
+      }
     }
     super.render(spec, clearDirectory: clearDirectory);
   }
 
-  // ── barrel: exclude api_client.dart (replaced by Dio) ────────────────────
+  // ── barrel: separate api / models / dashpod_api barrels ──────────────────
 
   @override
   void renderPublicApi(Iterable<Api> apis, Iterable<RenderSchema> schemas) {
+    final apisList = apis.toList();
     final schemasList = schemas.toList();
-    final paths = <String>{
-      ...apis.map(FileRenderer.apiPackagePath),
-      ...schemasList.map(modelPackagePath),
-      'api_exception.dart',
-    };
-    final exportContexts = [
-      for (final path in (paths.toList()..sort()))
-        {
-          'path': 'package:$packageName/$path',
-          'hasShow': false,
-          'shownTypes': '',
-        },
-    ];
+
+    // lib/api.dart – API classes
+    final apiExports =
+        apisList
+            .map((a) => 'package:$packageName/${_apiPackagePath(a)}')
+            .toList()
+          ..sort();
+    _writeBarrel('lib/api.dart', apiExports);
+
+    // lib/models.dart – model/DTO classes
+    final modelExports =
+        schemasList
+            .map((s) => 'package:$packageName/${modelPackagePath(s)}')
+            .toList()
+          ..sort();
+    _writeBarrel('lib/models.dart', modelExports);
+
+    // lib/dashpod_api.dart – top-level barrel re-exporting both
+    _writeBarrel('lib/dashpod_api.dart', [
+      'package:$packageName/api.dart',
+      'package:$packageName/models.dart',
+    ]);
+  }
+
+  void _writeBarrel(String path, List<String> exportPaths) {
+    final exportContexts = exportPaths
+        .map((p) => {'path': p, 'hasShow': false, 'shownTypes': ''})
+        .toList();
     final output = templates.loadTemplate('public_api').renderString({
       'imports': <String>[],
       'exports': exportContexts,
     });
-    fileWriter.writeFile(path: 'lib/api.dart', content: output);
+    fileWriter.writeFile(path: path, content: output);
   }
 
   // ── Retrofit client generation ────────────────────────────────────────────
 
   @override
   List<Api> renderApis(List<Api> apis) {
+    // Populate schema→API map before renderModels is called so modelPath works.
+    _buildSchemaApiGroup(apis);
+
     final myTemplates = _customTemplateProvider();
     final rendered = <Api>[];
 
     for (final api in apis) {
-      // Render via the standard pipeline to collect model-helper usage.
-      // We discard the rendered body but keep the usage side-effect.
       final renderedApi = schemaRenderer.renderApi(api);
       usedModelHelpers.addAll(renderedApi.usage.modelHelpers);
 
-      // Build per-endpoint mustache context.
       final endpointContexts = _endpointContexts(api);
-
-      // Collect model imports directly from endpoint schemas (no
-      // @visibleForTesting members needed).
       final schemaImports = (_schemaImportPaths(
         api,
       ).toList()..sort()).map((p) => {'path': p}).toList();
 
       final content = myTemplates.loadTemplate('retrofit_client').renderString({
-        'className': api.className,
-        'fileName': api.fileName,
+        'className': _apiClassName(api),
+        'fileName': _apiFileName(api),
         'description': api.description,
+        'baseUrl': _serverUrl?.toString() ?? '',
         'endpoints': endpointContexts,
         'imports': schemaImports,
       });
 
-      fileWriter.writeFile(
-        path: FileRenderer.apiFilePath(api),
-        content: content,
-      );
+      fileWriter.writeFile(path: _apiFilePath(api), content: content);
       rendered.add(api);
     }
 
     return rendered;
   }
 
-  /// Build the mustache context list for every endpoint in [api].
+  void _buildSchemaApiGroup(List<Api> apis) {
+    _schemaApiGroup.clear();
+    _apiPrefixes.clear();
+
+    for (final api in apis) {
+      final group = _cleanApiSnakeName(api);
+
+      // Tier-1: direct endpoint schema references.
+      void add(RenderSchema schema) {
+        if (schema.createsNewType && !schema.isSmooshed) {
+          _schemaApiGroup.putIfAbsent(schema.snakeName, () => group);
+        }
+      }
+
+      for (final endpoint in api.endpoints) {
+        for (final p in endpoint.parameters) {
+          add(p.type);
+        }
+        final rb = endpoint.requestBody;
+        if (rb != null) add(rb.schema);
+        for (final r in endpoint.operation.responses) {
+          add(r.content);
+        }
+        for (final r in endpoint.operation.rangeResponses) {
+          add(r.content);
+        }
+        final def = endpoint.operation.defaultResponse;
+        if (def != null) add(def.content);
+      }
+
+      // Tier-3 prefixes: the clean API name and its singular form so that
+      // entity DTOs like 'release_dto' are matched by the 'releases' API
+      // even when they're not directly referenced by an endpoint.
+      _apiPrefixes.add((group, group));
+      final singular = _singular(group);
+      if (singular != group) _apiPrefixes.add((singular, group));
+    }
+
+    // Sort longest prefix first so greedy matching picks the most specific group.
+    _apiPrefixes.sort((a, b) => b.$1.length.compareTo(a.$1.length));
+  }
+
   List<Map<String, dynamic>> _endpointContexts(Api api) {
     final result = <Map<String, dynamic>>[];
-
     for (final endpoint in api.endpoints) {
-      // Use the standard template context to get the already-computed
-      // method name (with removePrefix applied) and return type string.
       final stdCtx = endpoint.toTemplateContext(
         schemaRenderer,
         removePrefix: api.removePrefix,
@@ -182,8 +276,6 @@ class DashpodFileRenderer extends FileRenderer {
       final returnType = stdCtx['returnType'] as String? ?? 'void';
 
       final params = <Map<String, dynamic>>[];
-
-      // Path / query / header parameters.
       for (final p in endpoint.parameters) {
         final dartName = p.dartParameterName(quirks);
         final annotation = switch (p.inLocation.name) {
@@ -198,8 +290,6 @@ class DashpodFileRenderer extends FileRenderer {
           'dartName': dartName,
         });
       }
-
-      // Request body parameter (RenderRequestBody.schema is RenderSchema, exported).
       final rb = endpoint.requestBody;
       if (rb != null) {
         final typeName = rb.schema.typeName;
@@ -213,7 +303,6 @@ class DashpodFileRenderer extends FileRenderer {
           'dartName': rb.dartParameterName(quirks),
         });
       }
-
       result.add({
         'httpMethod': endpoint.method.name.toUpperCase(),
         'urlPath': endpoint.path,
@@ -222,18 +311,11 @@ class DashpodFileRenderer extends FileRenderer {
         'params': params,
       });
     }
-
     return result;
   }
 
-  /// Collect import paths for every model type referenced by [api]'s endpoints.
-  ///
-  /// Accesses [RenderSchema] (exported) through type-inferred unexported
-  /// wrappers: parameter types, request body schema, and all response content
-  /// schemas — no `@visibleForTesting` members required.
   Set<String> _schemaImportPaths(Api api) {
     final paths = <String>{};
-
     void add(RenderSchema schema) {
       if (schema.createsNewType && !schema.isSmooshed) {
         paths.add(modelPackageImport(this, schema));
@@ -255,23 +337,14 @@ class DashpodFileRenderer extends FileRenderer {
       final def = endpoint.operation.defaultResponse;
       if (def != null) add(def.content);
     }
-
     return paths;
   }
 
-  /// Returns a [TemplateProvider] pointing at `lib/templates/` in this package.
-  ///
-  /// Resolved relative to this script's location so it works regardless of
-  /// the working directory from which the generator is invoked.
   TemplateProvider _customTemplateProvider() {
     final scriptPath = io.Platform.script.toFilePath();
-    // script → …/packages/dashpod_api/bin/gen.dart
-    // parent  → …/packages/dashpod_api/bin
-    // parent  → …/packages/dashpod_api          (package root)
     final packageDir = io.File(scriptPath).parent.parent.path;
-    final templatesPath = '$packageDir/bin/templates';
     return TemplateProvider.fromDirectory(
-      fileWriter.fs.directory(templatesPath),
+      fileWriter.fs.directory('$packageDir/bin/templates'),
     );
   }
 }
