@@ -11,7 +11,7 @@ abstract class ChannelsApi {
   factory ChannelsApi(Dio dio) => _ChannelsApi(dio);
 
   @GET('/api/v1/apps/{appId}/channels')
-  Future<List<ChannelDto>> list2(@Path('appId') String appId);
+  Future<List<ChannelDto>> list3(@Path('appId') String appId);
 
   @POST('/api/v1/apps/{appId}/channels')
   Future<ChannelDto> create4(

@@ -20,7 +20,7 @@ class _AppsApi implements AppsApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<GetAppsResponseDto> list3() async {
+  Future<GetAppsResponseDto> list4() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
