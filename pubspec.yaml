@@ -9,3 +9,4 @@ workspace:
   - packages/dashpod_delivery
   - packages/dashpod_updater
   - packages/dexdiff
+  - packages/flutter_revision
