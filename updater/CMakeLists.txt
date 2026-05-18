@@ -59,6 +59,14 @@ set(ZSTD_BUILD_TESTS  OFF CACHE BOOL "" FORCE)
 set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(zstd_fetch)
 
+# zlib — for DEFLATE decompression of APK entries (system library on macOS,
+# Linux, and Android NDK; required on Android, optional elsewhere for tests).
+if(ANDROID)
+    find_package(ZLIB REQUIRED)
+else()
+    find_package(ZLIB)
+endif()
+
 # Core library — all orchestration, state machine, and FFI live here.
 set(DASHPOD_UPDATER_SOURCES
     src/util/logging.cpp
@@ -101,6 +109,10 @@ target_link_libraries(dashpod_updater_obj PUBLIC
     httplib::httplib
     libzstd_static
 )
+if(ZLIB_FOUND)
+    target_compile_definitions(dashpod_updater_obj PRIVATE DASHPOD_HAVE_ZLIB)
+    target_link_libraries(dashpod_updater_obj PUBLIC ZLIB::ZLIB)
+endif()
 set_target_properties(dashpod_updater_obj PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     CXX_VISIBILITY_PRESET hidden

@@ -11,6 +11,7 @@ add_executable(dashpod_updater_tests
     test_network.cpp
     test_inflate.cpp
     test_lifecycle.cpp
+    test_android.cpp
 )
 
 target_include_directories(dashpod_updater_tests PRIVATE
