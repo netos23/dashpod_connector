@@ -3,7 +3,9 @@
 #include <thread>
 
 #include "cache/lifecycle.h"
+#include "cache/signing.h"
 #include "core/error.h"
+#include "core/inflate.h"
 #include "core/updater_lock.h"
 #include "core/yaml.h"
 #include "net/network.h"
@@ -26,25 +28,14 @@ void with_state(const std::function<void(cache::UpdaterState&)>& f) {
     f(state);
 }
 
-// Inflate a downloaded compressed patch (zstd over bidiff) on top of
-// the base library and write the inflated artifact to `output_path`.
-// Currently a stub — needs zstd + bidiff (or whichever delta format
-// we end up using). Returns true on success.
-//
-// TODO: link libzstd and a bidiff implementation, port the
-// pipe-between-threads pattern from updater.rs::inflate.
-bool inflate_patch(const std::filesystem::path& patch_path,
-                    IReadSeek& /*base*/,
-                    const std::filesystem::path& output_path) {
-    DASHPOD_WARN("inflate_patch: zstd+bidiff not yet linked; "
-                  "patch ", patch_path.string(), " -> ", output_path.string());
-    return false;
-}
-
-bool check_inflated_hash(const std::filesystem::path& /*path*/,
-                          const std::string& /*expected*/) {
-    DASHPOD_WARN("check_inflated_hash: stubbed pending inflate_patch");
-    return false;
+bool check_inflated_hash(const std::filesystem::path& path,
+                          const std::string& expected) {
+    try {
+        return signing::hash_file(path) == expected;
+    } catch (const std::exception& e) {
+        DASHPOD_ERROR("check_inflated_hash: ", e.what());
+        return false;
+    }
 }
 
 void roll_back_patches_if_needed(const std::vector<std::size_t>& patch_numbers) {

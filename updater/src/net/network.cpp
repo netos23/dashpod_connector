@@ -1,6 +1,12 @@
 #include "net/network.h"
 
+#include <fstream>
 #include <system_error>
+
+#ifndef CPPHTTPLIB_OPENSSL_SUPPORT
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+#endif
+#include <httplib.h>
 
 #include "core/config.h"
 #include "core/error.h"
@@ -88,39 +94,162 @@ std::string patches_events_url(const std::string& base_url) {
     return base_url + "/api/v1/patches/events";
 }
 
-// ---------------- Hook defaults (real HTTP) ----------------
+// ---------------- HTTP helpers ----------------
 
 namespace {
 
-PatchCheckResponse default_patch_check_request(const std::string& /*url*/,
-                                                const PatchCheckRequest& /*req*/) {
-    // TODO: implement real HTTP via libcurl / cpp-httplib.
-    throw UpdaterError(UpdaterError::Kind::Network,
-        "HTTP client not yet wired up — install a NetworkHooks fake "
-        "(default networking is stubbed)");
+// Splits "https://host/path" into ("https://host", "/path").
+std::pair<std::string, std::string> split_url(const std::string& url) {
+    auto sep = url.find("://");
+    if (sep == std::string::npos) return {"http://localhost", url};
+    auto after = sep + 3;
+    auto slash = url.find('/', after);
+    if (slash == std::string::npos) return {url, "/"};
+    return {url.substr(0, slash), url.substr(slash)};
 }
 
-DownloadResult default_download_to_path(const std::string& /*url*/,
-                                         const fs::path& /*dest*/,
-                                         std::uint64_t /*resume_from*/) {
-    throw UpdaterError(UpdaterError::Kind::Network,
-        "HTTP client not yet wired up");
+// Configures timeouts common to every client instance.
+void configure(httplib::Client& cli) {
+    cli.set_connection_timeout(10);
+    cli.set_read_timeout(300);
+    cli.set_write_timeout(30);
 }
 
-void default_report_event(const std::string& /*url*/,
-                           const PatchEvent& /*event*/) {
-    throw UpdaterError(UpdaterError::Kind::Network,
-        "HTTP client not yet wired up");
+// ---- Default NetworkHooks implementations ----
+
+PatchCheckResponse real_patch_check_request(const std::string& url,
+                                              const PatchCheckRequest& req) {
+    auto [base, path] = split_url(url);
+    httplib::Client cli(base);
+    configure(cli);
+
+    auto body = patch_check_request_to_json(req).dump();
+    DASHPOD_INFO("POST ", url);
+    auto res = cli.Post(path, body, "application/json");
+    if (!res) {
+        throw UpdaterError(UpdaterError::Kind::Network,
+            "Patch check failed (error=" +
+            std::to_string(static_cast<int>(res.error())) + ")");
+    }
+    if (res->status != 200) {
+        throw UpdaterError(UpdaterError::Kind::BadServerResponse,
+            "Patch check returned HTTP " + std::to_string(res->status));
+    }
+    try {
+        auto j = nlohmann::json::parse(res->body);
+        return patch_check_response_from_json(j);
+    } catch (const nlohmann::json::exception& e) {
+        throw UpdaterError(UpdaterError::Kind::BadServerResponse,
+            std::string("Patch check: malformed JSON: ") + e.what());
+    }
+}
+
+DownloadResult real_download_to_path(const std::string& url,
+                                      const fs::path& dest,
+                                      std::uint64_t resume_from) {
+    auto [base, path] = split_url(url);
+    httplib::Client cli(base);
+    configure(cli);
+
+    // Open the output file.  On resume we append; on fresh start we truncate.
+    auto open_mode = (resume_from > 0)
+        ? (std::ios::binary | std::ios::app)
+        : (std::ios::binary | std::ios::trunc);
+    std::ofstream out(dest, open_mode);
+    if (!out) {
+        throw UpdaterError(UpdaterError::Kind::Io,
+            "Cannot open " + dest.string() + " for writing");
+    }
+
+    DownloadResult result;
+    std::uint64_t written = 0;
+
+    httplib::Headers headers;
+    if (resume_from > 0) {
+        headers.insert({"Range", "bytes=" + std::to_string(resume_from) + "-"});
+    }
+
+    bool response_ok = false;
+
+    auto response_handler = [&](const httplib::Response& resp) -> bool {
+        if (resp.status == 200 && resume_from > 0) {
+            // Server ignored the Range header — restart from scratch.
+            out.close();
+            out.open(dest, std::ios::binary | std::ios::trunc);
+            if (!out) return false;
+        } else if (resp.status == 206) {
+            // Parse Content-Range: bytes START-END/TOTAL
+            auto cr = resp.get_header_value("Content-Range");
+            auto slash = cr.rfind('/');
+            if (slash != std::string::npos) {
+                try {
+                    result.content_length = std::stoull(cr.substr(slash + 1));
+                } catch (...) {}
+            }
+        } else if (resp.status == 200) {
+            auto cl = resp.get_header_value("Content-Length");
+            if (!cl.empty()) {
+                try { result.content_length = std::stoull(cl); } catch (...) {}
+            }
+        } else {
+            DASHPOD_ERROR("Download returned HTTP ", resp.status, " for ", url);
+            return false;
+        }
+        response_ok = true;
+        return true;
+    };
+
+    auto content_receiver = [&](const char* data, size_t len) -> bool {
+        out.write(data, static_cast<std::streamsize>(len));
+        if (!out) return false;
+        written += len;
+        return true;
+    };
+
+    DASHPOD_INFO("GET ", url, (resume_from ? " (resume from " + std::to_string(resume_from) + ")" : ""));
+    auto res = cli.Get(path, headers, response_handler, content_receiver);
+    if (!res || !response_ok) {
+        throw UpdaterError(UpdaterError::Kind::Network,
+            "Download failed (url=" + url + " error=" +
+            std::to_string(static_cast<int>(res.error())) + ")");
+    }
+
+    result.total_bytes = written;
+    return result;
+}
+
+void real_report_event(const std::string& url, const PatchEvent& event) {
+    auto [base, path] = split_url(url);
+    httplib::Client cli(base);
+    configure(cli);
+
+    nlohmann::json body_json;
+    body_json["event"] = patch_event_to_json(event);
+    auto body = body_json.dump();
+    DASHPOD_INFO("POST event ", url);
+    auto res = cli.Post(path, body, "application/json");
+    if (!res) {
+        throw UpdaterError(UpdaterError::Kind::Network,
+            "Event report failed (error=" +
+            std::to_string(static_cast<int>(res.error())) + ")");
+    }
+    // 200, 201, 202 are all acceptable.
+    if (res->status < 200 || res->status > 299) {
+        throw UpdaterError(UpdaterError::Kind::BadServerResponse,
+            "Event report returned HTTP " + std::to_string(res->status));
+    }
 }
 
 }  // namespace
 
-NetworkHooks::NetworkHooks()
-    : patch_check_request_fn(default_patch_check_request),
-      download_to_path_fn(default_download_to_path),
-      report_event_fn(default_report_event) {}
+// ---------------- NetworkHooks ----------------
 
-// ---------------- Helpers ----------------
+NetworkHooks::NetworkHooks()
+    : patch_check_request_fn(real_patch_check_request),
+      download_to_path_fn(real_download_to_path),
+      report_event_fn(real_report_event) {}
+
+// ---------------- Helpers called by the orchestrator ----------------
 
 DownloadResult download_to_path(const NetworkHooks& hooks,
                                  const std::string& url,

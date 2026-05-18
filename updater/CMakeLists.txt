@@ -18,6 +18,7 @@ endif()
 include(FetchContent)
 set(FETCHCONTENT_QUIET ON)
 
+# nlohmann/json
 FetchContent_Declare(
     nlohmann_json
     GIT_REPOSITORY https://github.com/nlohmann/json.git
@@ -26,7 +27,47 @@ FetchContent_Declare(
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 FetchContent_MakeAvailable(nlohmann_json)
 
-# Core library — all the orchestration, state machine, and FFI live here.
+# OpenSSL — RSA-PKCS1v1.5 signing + HTTPS transport
+if(APPLE AND NOT DEFINED OPENSSL_ROOT_DIR)
+    execute_process(COMMAND brew --prefix openssl@3
+        OUTPUT_VARIABLE BREW_OPENSSL
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET)
+    if(BREW_OPENSSL)
+        set(OPENSSL_ROOT_DIR "${BREW_OPENSSL}" CACHE PATH "Homebrew OpenSSL root")
+    endif()
+endif()
+find_package(OpenSSL REQUIRED)
+
+# cpp-httplib — header-only HTTPS client (OpenSSL backend)
+FetchContent_Declare(httplib
+    GIT_REPOSITORY https://github.com/yhirose/cpp-httplib.git
+    GIT_TAG v0.18.3
+    GIT_SHALLOW TRUE)
+set(HTTPLIB_USE_OPENSSL_IF_AVAILABLE ON CACHE BOOL "" FORCE)
+set(HTTPLIB_COMPILE OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(httplib)
+
+# zstd — patch decompression
+FetchContent_Declare(zstd_fetch
+    GIT_REPOSITORY https://github.com/facebook/zstd.git
+    GIT_TAG v1.5.6
+    GIT_SHALLOW TRUE
+    SOURCE_SUBDIR build/cmake)
+set(ZSTD_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_TESTS  OFF CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(zstd_fetch)
+
+# zlib — for DEFLATE decompression of APK entries (system library on macOS,
+# Linux, and Android NDK; required on Android, optional elsewhere for tests).
+if(ANDROID)
+    find_package(ZLIB REQUIRED)
+else()
+    find_package(ZLIB)
+endif()
+
+# Core library — all orchestration, state machine, and FFI live here.
 set(DASHPOD_UPDATER_SOURCES
     src/util/logging.cpp
     src/util/time.cpp
@@ -34,6 +75,7 @@ set(DASHPOD_UPDATER_SOURCES
     src/core/config.cpp
     src/core/updater_lock.cpp
     src/core/updater.cpp
+    src/core/inflate.cpp
     src/cache/disk_io.cpp
     src/cache/signing.cpp
     src/cache/lifecycle.cpp
@@ -41,6 +83,7 @@ set(DASHPOD_UPDATER_SOURCES
     src/net/network.cpp
     src/net/events.cpp
     src/io/c_file.cpp
+    src/platform/android.cpp
     src/api/common.cpp
     src/api/engine.cpp
     src/api/dart.cpp
@@ -54,7 +97,22 @@ target_include_directories(dashpod_updater_obj
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
-target_link_libraries(dashpod_updater_obj PUBLIC nlohmann_json::nlohmann_json)
+# CPPHTTPLIB_OPENSSL_SUPPORT is forwarded by httplib::httplib when OpenSSL is
+# found; the explicit define here is a belt-and-suspenders guard.
+target_compile_definitions(dashpod_updater_obj PRIVATE
+    CPPHTTPLIB_OPENSSL_SUPPORT
+)
+target_link_libraries(dashpod_updater_obj PUBLIC
+    nlohmann_json::nlohmann_json
+    OpenSSL::Crypto
+    OpenSSL::SSL
+    httplib::httplib
+    libzstd_static
+)
+if(ZLIB_FOUND)
+    target_compile_definitions(dashpod_updater_obj PRIVATE DASHPOD_HAVE_ZLIB)
+    target_link_libraries(dashpod_updater_obj PUBLIC ZLIB::ZLIB)
+endif()
 set_target_properties(dashpod_updater_obj PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     CXX_VISIBILITY_PRESET hidden
@@ -83,7 +141,7 @@ add_library(dashpod::updater ALIAS dashpod_updater_static)
 add_executable(updater tests/main.cpp)
 target_link_libraries(updater PRIVATE dashpod_updater_static)
 
-option(DASHPOD_UPDATER_BUILD_TESTS "Build tests" OFF)
+option(DASHPOD_UPDATER_BUILD_TESTS "Build Catch2 unit tests" OFF)
 if(DASHPOD_UPDATER_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
