@@ -12,7 +12,7 @@ abstract class AppCollaboratorsApi {
   factory AppCollaboratorsApi(Dio dio) => _AppCollaboratorsApi(dio);
 
   @GET('/api/v1/apps/{appId}/collaborators')
-  Future<GetAppCollaboratorsResponseDto> list2(@Path('appId') String appId);
+  Future<GetAppCollaboratorsResponseDto> list3(@Path('appId') String appId);
 
   @POST('/api/v1/apps/{appId}/collaborators')
   Future<dynamic> add(

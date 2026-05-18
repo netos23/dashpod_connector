@@ -12,10 +12,10 @@ abstract class AppsApi {
   factory AppsApi(Dio dio) => _AppsApi(dio);
 
   @GET('/api/v1/apps')
-  Future<GetAppsResponseDto> list4();
+  Future<GetAppsResponseDto> list5();
 
   @POST('/api/v1/apps')
-  Future<AppDto> create5(@Body() CreateAppRequestDto createAppRequestDto);
+  Future<AppDto> create6(@Body() CreateAppRequestDto createAppRequestDto);
 
   @DELETE('/api/v1/apps/{appId}')
   Future<dynamic> delete(@Path('appId') String appId);

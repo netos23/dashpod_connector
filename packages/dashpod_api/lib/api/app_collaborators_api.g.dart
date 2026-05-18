@@ -20,7 +20,7 @@ class _AppCollaboratorsApi implements AppCollaboratorsApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<GetAppCollaboratorsResponseDto> list2(String appId) async {
+  Future<GetAppCollaboratorsResponseDto> list3(String appId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};

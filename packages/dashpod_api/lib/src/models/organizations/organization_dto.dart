@@ -8,6 +8,9 @@ class OrganizationDto {
     this.id,
     this.name,
     this.organizationType,
+    this.picture,
+    this.website,
+    this.description,
     this.createdAt,
     this.updatedAt,
   });
@@ -23,6 +26,9 @@ class OrganizationDto {
         organizationType: OrganizationDtoOrganizationType.maybeFromJson(
           json['organization_type'] as String?,
         ),
+        picture: json['picture'] as String?,
+        website: json['website'] as String?,
+        description: json['description'] as String?,
         createdAt: maybeParseDateTime(json['created_at'] as String?),
         updatedAt: maybeParseDateTime(json['updated_at'] as String?),
       ),
@@ -41,6 +47,9 @@ class OrganizationDto {
   final int? id;
   final String? name;
   final OrganizationDtoOrganizationType? organizationType;
+  final String? picture;
+  final String? website;
+  final String? description;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -50,14 +59,25 @@ class OrganizationDto {
       'id': id,
       'name': name,
       'organization_type': organizationType?.toJson(),
+      'picture': picture,
+      'website': website,
+      'description': description,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
   }
 
   @override
-  int get hashCode =>
-      Object.hashAll([id, name, organizationType, createdAt, updatedAt]);
+  int get hashCode => Object.hashAll([
+    id,
+    name,
+    organizationType,
+    picture,
+    website,
+    description,
+    createdAt,
+    updatedAt,
+  ]);
 
   @override
   bool operator ==(Object other) {
@@ -66,6 +86,9 @@ class OrganizationDto {
         id == other.id &&
         name == other.name &&
         organizationType == other.organizationType &&
+        picture == other.picture &&
+        website == other.website &&
+        description == other.description &&
         createdAt == other.createdAt &&
         updatedAt == other.updatedAt;
   }

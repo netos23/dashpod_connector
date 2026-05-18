@@ -77,7 +77,7 @@ class _PatchesApi implements PatchesApi {
   }
 
   @override
-  Future<CreatePatchResponseDto> create3(
+  Future<CreatePatchResponseDto> create4(
     String appId,
     CreatePatchRequestDto createPatchRequestDto,
   ) async {
