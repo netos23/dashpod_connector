@@ -13,7 +13,7 @@ class PublicUserDto {
       () => PublicUserDto(
         id: (json['id'] as int?),
         email: json['email'] as String?,
-        displayName: json['displayName'] as String?,
+        displayName: json['display_name'] as String?,
       ),
     );
   }
@@ -33,7 +33,7 @@ class PublicUserDto {
 
   /// Converts a [PublicUserDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
-    return {'id': id, 'email': email, 'displayName': displayName};
+    return {'id': id, 'email': email, 'display_name': displayName};
   }
 
   @override

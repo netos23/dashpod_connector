@@ -16,11 +16,11 @@ class PatchCheckResponseDto {
       'PatchCheckResponseDto',
       json,
       () => PatchCheckResponseDto(
-        patchAvailable: json['patchAvailable'] as bool?,
+        patchAvailable: json['patch_available'] as bool?,
         patch: PatchPayloadDto.maybeFromJson(
           json['patch'] as Map<String, dynamic>?,
         ),
-        rolledBackPatchNumbers: (json['rolledBackPatchNumbers'] as List?)
+        rolledBackPatchNumbers: (json['rolled_back_patch_numbers'] as List?)
             ?.cast<int>(),
       ),
     );
@@ -42,9 +42,9 @@ class PatchCheckResponseDto {
   /// Converts a [PatchCheckResponseDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
     return {
-      'patchAvailable': patchAvailable,
+      'patch_available': patchAvailable,
       'patch': patch?.toJson(),
-      'rolledBackPatchNumbers': rolledBackPatchNumbers,
+      'rolled_back_patch_numbers': rolledBackPatchNumbers,
     };
   }
 

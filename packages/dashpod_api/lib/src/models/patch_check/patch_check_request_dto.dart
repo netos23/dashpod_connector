@@ -21,15 +21,15 @@ class PatchCheckRequestDto {
       'PatchCheckRequestDto',
       json,
       () => PatchCheckRequestDto(
-        appId: json['appId'] as String?,
+        appId: json['app_id'] as String?,
         channel: json['channel'] as String?,
-        releaseVersion: json['releaseVersion'] as String?,
+        releaseVersion: json['release_version'] as String?,
         platform: PatchCheckRequestDtoPlatform.maybeFromJson(
           json['platform'] as String?,
         ),
         arch: PatchCheckRequestDtoArch.maybeFromJson(json['arch'] as String?),
-        clientId: json['clientId'] as String?,
-        currentPatchNumber: (json['currentPatchNumber'] as int?),
+        clientId: json['client_id'] as String?,
+        currentPatchNumber: (json['current_patch_number'] as int?),
       ),
     );
   }
@@ -54,13 +54,13 @@ class PatchCheckRequestDto {
   /// Converts a [PatchCheckRequestDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
     return {
-      'appId': appId,
+      'app_id': appId,
       'channel': channel,
-      'releaseVersion': releaseVersion,
+      'release_version': releaseVersion,
       'platform': platform?.toJson(),
       'arch': arch?.toJson(),
-      'clientId': clientId,
-      'currentPatchNumber': currentPatchNumber,
+      'client_id': clientId,
+      'current_patch_number': currentPatchNumber,
     };
   }
 

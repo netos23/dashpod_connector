@@ -11,8 +11,8 @@ class PromotePatchRequestDto {
       'PromotePatchRequestDto',
       json,
       () => PromotePatchRequestDto(
-        patchId: (json['patchId'] as int?),
-        channelId: (json['channelId'] as int?),
+        patchId: (json['patch_id'] as int?),
+        channelId: (json['channel_id'] as int?),
       ),
     );
   }
@@ -31,7 +31,7 @@ class PromotePatchRequestDto {
 
   /// Converts a [PromotePatchRequestDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
-    return {'patchId': patchId, 'channelId': channelId};
+    return {'patch_id': patchId, 'channel_id': channelId};
   }
 
   @override

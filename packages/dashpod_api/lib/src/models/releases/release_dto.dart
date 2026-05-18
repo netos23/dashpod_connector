@@ -24,20 +24,20 @@ class ReleaseDto {
       json,
       () => ReleaseDto(
         id: (json['id'] as int?),
-        appId: json['appId'] as String?,
+        appId: json['app_id'] as String?,
         version: json['version'] as String?,
-        flutterRevision: json['flutterRevision'] as String?,
-        platformStatuses: (json['platformStatuses'] as Map<String, dynamic>?)
+        flutterRevision: json['flutter_revision'] as String?,
+        platformStatuses: (json['platform_statuses'] as Map<String, dynamic>?)
             ?.map(
               (key, value) => MapEntry(
                 key,
                 ReleaseDtoPlatformStatuses.fromJson(value as String),
               ),
             ),
-        createdAt: maybeParseDateTime(json['createdAt'] as String?),
-        updatedAt: maybeParseDateTime(json['updatedAt'] as String?),
-        flutterVersion: json['flutterVersion'] as String?,
-        displayName: json['displayName'] as String?,
+        createdAt: maybeParseDateTime(json['created_at'] as String?),
+        updatedAt: maybeParseDateTime(json['updated_at'] as String?),
+        flutterVersion: json['flutter_version'] as String?,
+        displayName: json['display_name'] as String?,
         notes: json['notes'] as String?,
       ),
     );
@@ -67,16 +67,16 @@ class ReleaseDto {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'appId': appId,
+      'app_id': appId,
       'version': version,
-      'flutterRevision': flutterRevision,
-      'platformStatuses': platformStatuses?.map(
+      'flutter_revision': flutterRevision,
+      'platform_statuses': platformStatuses?.map(
         (key, value) => MapEntry(key, value.toJson()),
       ),
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      'flutterVersion': flutterVersion,
-      'displayName': displayName,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'flutter_version': flutterVersion,
+      'display_name': displayName,
       'notes': notes,
     };
   }

@@ -22,10 +22,10 @@ class ApiKeyDto {
         id: (json['id'] as int?),
         name: json['name'] as String?,
         prefix: json['prefix'] as String?,
-        createdAt: maybeParseDateTime(json['createdAt'] as String?),
-        lastUsedAt: maybeParseDateTime(json['lastUsedAt'] as String?),
-        expiresAt: maybeParseDateTime(json['expiresAt'] as String?),
-        revokedAt: maybeParseDateTime(json['revokedAt'] as String?),
+        createdAt: maybeParseDateTime(json['created_at'] as String?),
+        lastUsedAt: maybeParseDateTime(json['last_used_at'] as String?),
+        expiresAt: maybeParseDateTime(json['expires_at'] as String?),
+        revokedAt: maybeParseDateTime(json['revoked_at'] as String?),
       ),
     );
   }
@@ -53,10 +53,10 @@ class ApiKeyDto {
       'id': id,
       'name': name,
       'prefix': prefix,
-      'createdAt': createdAt?.toIso8601String(),
-      'lastUsedAt': lastUsedAt?.toIso8601String(),
-      'expiresAt': expiresAt?.toIso8601String(),
-      'revokedAt': revokedAt?.toIso8601String(),
+      'created_at': createdAt?.toIso8601String(),
+      'last_used_at': lastUsedAt?.toIso8601String(),
+      'expires_at': expiresAt?.toIso8601String(),
+      'revoked_at': revokedAt?.toIso8601String(),
     };
   }
 

@@ -28,7 +28,7 @@ class ReleasePatchDto {
             .toList(),
         notes: json['notes'] as String?,
         channel: json['channel'] as String?,
-        rolledBack: json['rolledBack'] as bool?,
+        rolledBack: json['rolled_back'] as bool?,
       ),
     );
   }
@@ -57,7 +57,7 @@ class ReleasePatchDto {
       'artifacts': artifacts?.map((e) => e.toJson()).toList(),
       'notes': notes,
       'channel': channel,
-      'rolledBack': rolledBack,
+      'rolled_back': rolledBack,
     };
   }
 

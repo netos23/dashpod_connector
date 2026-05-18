@@ -22,13 +22,13 @@ class PatchEventDto {
       'PatchEventDto',
       json,
       () => PatchEventDto(
-        appId: json['appId'] as String?,
+        appId: json['app_id'] as String?,
         arch: json['arch'] as String?,
-        clientId: json['clientId'] as String?,
+        clientId: json['client_id'] as String?,
         type: PatchEventDtoType.maybeFromJson(json['type'] as String?),
-        patchNumber: (json['patchNumber'] as int?),
+        patchNumber: (json['patch_number'] as int?),
         platform: json['platform'] as String?,
-        releaseVersion: json['releaseVersion'] as String?,
+        releaseVersion: json['release_version'] as String?,
         timestamp: (json['timestamp'] as int?),
         message: json['message'] as String?,
       ),
@@ -57,13 +57,13 @@ class PatchEventDto {
   /// Converts a [PatchEventDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
     return {
-      'appId': appId,
+      'app_id': appId,
       'arch': arch,
-      'clientId': clientId,
+      'client_id': clientId,
       'type': type?.toJson(),
-      'patchNumber': patchNumber,
+      'patch_number': patchNumber,
       'platform': platform,
-      'releaseVersion': releaseVersion,
+      'release_version': releaseVersion,
       'timestamp': timestamp,
       'message': message,
     };

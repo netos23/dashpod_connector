@@ -21,7 +21,7 @@ class CreateReleaseArtifactResponseDto {
       json,
       () => CreateReleaseArtifactResponseDto(
         id: (json['id'] as int?),
-        releaseId: (json['releaseId'] as int?),
+        releaseId: (json['release_id'] as int?),
         arch: json['arch'] as String?,
         platform: CreateReleaseArtifactResponseDtoPlatform.maybeFromJson(
           json['platform'] as String?,
@@ -56,7 +56,7 @@ class CreateReleaseArtifactResponseDto {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'releaseId': releaseId,
+      'release_id': releaseId,
       'arch': arch,
       'platform': platform?.toJson(),
       'hash': hash,

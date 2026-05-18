@@ -23,7 +23,7 @@ class ReleaseArtifactDto {
       json,
       () => ReleaseArtifactDto(
         id: (json['id'] as int?),
-        releaseId: (json['releaseId'] as int?),
+        releaseId: (json['release_id'] as int?),
         arch: json['arch'] as String?,
         platform: ReleaseArtifactDtoPlatform.maybeFromJson(
           json['platform'] as String?,
@@ -31,8 +31,8 @@ class ReleaseArtifactDto {
         hash: json['hash'] as String?,
         size: (json['size'] as int?),
         url: json['url'] as String?,
-        canSideload: json['canSideload'] as bool?,
-        podfileLockHash: json['podfileLockHash'] as String?,
+        canSideload: json['can_sideload'] as bool?,
+        podfileLockHash: json['podfile_lock_hash'] as String?,
       ),
     );
   }
@@ -60,14 +60,14 @@ class ReleaseArtifactDto {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'releaseId': releaseId,
+      'release_id': releaseId,
       'arch': arch,
       'platform': platform?.toJson(),
       'hash': hash,
       'size': size,
       'url': url,
-      'canSideload': canSideload,
-      'podfileLockHash': podfileLockHash,
+      'can_sideload': canSideload,
+      'podfile_lock_hash': podfileLockHash,
     };
   }
 

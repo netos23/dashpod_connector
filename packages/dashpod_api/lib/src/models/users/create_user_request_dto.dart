@@ -12,7 +12,7 @@ class CreateUserRequestDto {
       json,
       () => CreateUserRequestDto(
         name: json['name'] as String?,
-        organisationName: json['organisationName'] as String?,
+        organisationName: json['organisation_name'] as String?,
       ),
     );
   }
@@ -31,7 +31,7 @@ class CreateUserRequestDto {
 
   /// Converts a [CreateUserRequestDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
-    return {'name': name, 'organisationName': organisationName};
+    return {'name': name, 'organisation_name': organisationName};
   }
 
   @override

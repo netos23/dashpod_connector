@@ -12,7 +12,7 @@ class CreateApiKeyRequestDto {
       json,
       () => CreateApiKeyRequestDto(
         name: json['name'] as String?,
-        expiresAt: maybeParseDateTime(json['expiresAt'] as String?),
+        expiresAt: maybeParseDateTime(json['expires_at'] as String?),
       ),
     );
   }
@@ -31,7 +31,7 @@ class CreateApiKeyRequestDto {
 
   /// Converts a [CreateApiKeyRequestDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
-    return {'name': name, 'expiresAt': expiresAt?.toIso8601String()};
+    return {'name': name, 'expires_at': expiresAt?.toIso8601String()};
   }
 
   @override

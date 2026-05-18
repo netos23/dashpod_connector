@@ -27,8 +27,8 @@ class CreateReleaseArtifactRequestDto {
         hash: json['hash'] as String?,
         filename: json['filename'] as String?,
         size: (json['size'] as int?),
-        canSideload: json['canSideload'] as bool?,
-        podfileLockHash: json['podfileLockHash'] as String?,
+        canSideload: json['can_sideload'] as bool?,
+        podfileLockHash: json['podfile_lock_hash'] as String?,
       ),
     );
   }
@@ -60,8 +60,8 @@ class CreateReleaseArtifactRequestDto {
       'hash': hash,
       'filename': filename,
       'size': size,
-      'canSideload': canSideload,
-      'podfileLockHash': podfileLockHash,
+      'can_sideload': canSideload,
+      'podfile_lock_hash': podfileLockHash,
     };
   }
 
