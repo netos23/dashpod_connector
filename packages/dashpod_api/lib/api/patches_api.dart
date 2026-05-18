@@ -27,7 +27,7 @@ abstract class PatchesApi {
   );
 
   @POST('/api/v1/apps/{appId}/patches')
-  Future<CreatePatchResponseDto> create3(
+  Future<CreatePatchResponseDto> create4(
     @Path('appId') String appId,
     @Body() CreatePatchRequestDto createPatchRequestDto,
   );

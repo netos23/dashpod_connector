@@ -88,7 +88,7 @@ class _ReleasesApi implements ReleasesApi {
   }
 
   @override
-  Future<GetReleasesResponseDto> list1(String appId, bool? sideloadable) async {
+  Future<GetReleasesResponseDto> list2(String appId, bool? sideloadable) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'sideloadable': sideloadable};
     queryParameters.removeWhere((k, v) => v == null);
@@ -116,7 +116,7 @@ class _ReleasesApi implements ReleasesApi {
   }
 
   @override
-  Future<CreateReleaseResponseDto> create2(
+  Future<CreateReleaseResponseDto> create3(
     String appId,
     CreateReleaseRequestDto createReleaseRequestDto,
   ) async {

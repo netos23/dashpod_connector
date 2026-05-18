@@ -33,13 +33,13 @@ abstract class ReleasesApi {
   );
 
   @GET('/api/v1/apps/{appId}/releases')
-  Future<GetReleasesResponseDto> list1(
+  Future<GetReleasesResponseDto> list2(
     @Path('appId') String appId,
     @Query('sideloadable') bool? sideloadable,
   );
 
   @POST('/api/v1/apps/{appId}/releases')
-  Future<CreateReleaseResponseDto> create2(
+  Future<CreateReleaseResponseDto> create3(
     @Path('appId') String appId,
     @Body() CreateReleaseRequestDto createReleaseRequestDto,
   );
