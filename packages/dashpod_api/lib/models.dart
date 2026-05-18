@@ -18,6 +18,7 @@ export 'package:dashpod_api/src/models/organizations/create_organization_request
 export 'package:dashpod_api/src/models/organizations/get_organization_apps_response_dto.dart';
 export 'package:dashpod_api/src/models/organizations/get_organization_users_response_dto.dart';
 export 'package:dashpod_api/src/models/organizations/get_organizations_response_dto.dart';
+export 'package:dashpod_api/src/models/organizations/invite_org_member_request_dto.dart';
 export 'package:dashpod_api/src/models/organizations/org_avatar_upload_url_response_dto.dart';
 export 'package:dashpod_api/src/models/organizations/organization_dto.dart';
 export 'package:dashpod_api/src/models/organizations/organization_dto_organization_type.dart';
@@ -25,6 +26,9 @@ export 'package:dashpod_api/src/models/organizations/organization_membership_dto
 export 'package:dashpod_api/src/models/organizations/organization_membership_dto_role.dart';
 export 'package:dashpod_api/src/models/organizations/organization_user_dto.dart';
 export 'package:dashpod_api/src/models/organizations/organization_user_dto_role.dart';
+export 'package:dashpod_api/src/models/organizations/update_org_member_role_request_dto.dart';
+export 'package:dashpod_api/src/models/organizations/update_org_member_role_request_dto_role.dart';
+export 'package:dashpod_api/src/models/organizations/update_organization_request_dto.dart';
 export 'package:dashpod_api/src/models/patch_check/patch_check_request_dto.dart';
 export 'package:dashpod_api/src/models/patch_check/patch_check_request_dto_arch.dart';
 export 'package:dashpod_api/src/models/patch_check/patch_check_request_dto_platform.dart';

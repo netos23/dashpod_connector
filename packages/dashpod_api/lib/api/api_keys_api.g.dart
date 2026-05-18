@@ -20,7 +20,7 @@ class _ApiKeysApi implements ApiKeysApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<GetApiKeysResponseDto> list() async {
+  Future<GetApiKeysResponseDto> listApiKeys() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -47,7 +47,7 @@ class _ApiKeysApi implements ApiKeysApi {
   }
 
   @override
-  Future<CreateApiKeyResponseDto> create(
+  Future<CreateApiKeyResponseDto> createApiKey(
     CreateApiKeyRequestDto createApiKeyRequestDto,
   ) async {
     final _extra = <String, dynamic>{};
@@ -77,7 +77,7 @@ class _ApiKeysApi implements ApiKeysApi {
   }
 
   @override
-  Future<dynamic> revoke(int keyId) async {
+  Future<dynamic> deleteApiKey(int keyId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};

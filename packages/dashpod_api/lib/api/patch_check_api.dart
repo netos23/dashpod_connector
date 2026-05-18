@@ -11,7 +11,7 @@ abstract class PatchCheckApi {
   factory PatchCheckApi(Dio dio) => _PatchCheckApi(dio);
 
   @POST('/api/v1/patches/check')
-  Future<PatchCheckResponseDto> check(
+  Future<PatchCheckResponseDto> createCheck(
     @Body() PatchCheckRequestDto patchCheckRequestDto,
   );
 }

@@ -20,7 +20,7 @@ class _PatchEventsApi implements PatchEventsApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<dynamic> report(
+  Future<dynamic> createEvent(
     CreatePatchEventRequestDto createPatchEventRequestDto,
   ) async {
     final _extra = <String, dynamic>{};

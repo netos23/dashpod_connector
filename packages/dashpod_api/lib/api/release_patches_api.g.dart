@@ -20,7 +20,7 @@ class _ReleasePatchesApi implements ReleasePatchesApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<dynamic> update(
+  Future<dynamic> updatePatch(
     String appId,
     int releaseId,
     int patchId,
@@ -47,7 +47,7 @@ class _ReleasePatchesApi implements ReleasePatchesApi {
   }
 
   @override
-  Future<GetReleasePatchesResponseDto> list6(
+  Future<GetReleasePatchesResponseDto> listPatches(
     String appId,
     int releaseId,
   ) async {

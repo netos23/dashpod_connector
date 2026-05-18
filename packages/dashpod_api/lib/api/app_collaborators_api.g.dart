@@ -20,7 +20,7 @@ class _AppCollaboratorsApi implements AppCollaboratorsApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<GetAppCollaboratorsResponseDto> list3(String appId) async {
+  Future<GetAppCollaboratorsResponseDto> listCollaborators(String appId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -47,7 +47,7 @@ class _AppCollaboratorsApi implements AppCollaboratorsApi {
   }
 
   @override
-  Future<dynamic> add(
+  Future<dynamic> createCollaborator(
     String appId,
     CreateAppCollaboratorRequestDto createAppCollaboratorRequestDto,
   ) async {
@@ -72,7 +72,7 @@ class _AppCollaboratorsApi implements AppCollaboratorsApi {
   }
 
   @override
-  Future<dynamic> remove(String appId, int collaboratorId) async {
+  Future<dynamic> deleteCollaborator(String appId, int collaboratorId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -93,7 +93,7 @@ class _AppCollaboratorsApi implements AppCollaboratorsApi {
   }
 
   @override
-  Future<dynamic> update2(
+  Future<dynamic> updateCollaborator(
     String appId,
     int collaboratorId,
     UpdateAppCollaboratorRequestDto updateAppCollaboratorRequestDto,

@@ -46,6 +46,41 @@ class DashpodFileRenderer extends FileRenderer {
     return name;
   }
 
+  // Derive a method name from the HTTP verb and URL path.
+  // The last non-path-variable segment drives the resource noun; the verb
+  // and whether the raw last segment is a variable determine the prefix.
+  // Examples:
+  //   GET  /api/v1/organizations              → listOrganizations
+  //   GET  /api/v1/organizations/{id}/users   → listUsers
+  //   GET  /api/v1/organizations/{id}         → getOrganization
+  //   POST /api/v1/organizations              → createOrganization
+  //   PUT  /api/v1/organizations/{id}         → updateOrganization
+  //   DELETE /api/v1/organizations/{id}       → deleteOrganization
+  static String _deriveMethodName(String httpMethod, String path) {
+    final segments = path.split('/').where((s) => s.isNotEmpty).toList();
+    final wordSegments = segments.where((s) => !s.startsWith('{')).toList();
+    if (wordSegments.isEmpty) return httpMethod.toLowerCase();
+
+    final resource = wordSegments.last;
+    final isSingleItem = segments.isNotEmpty && segments.last.startsWith('{');
+
+    String toPascal(String s) => s
+        .split(RegExp(r'[-_]'))
+        .map((p) => p.isEmpty ? '' : p[0].toUpperCase() + p.substring(1))
+        .join();
+
+    final resourcePascal = toPascal(resource);
+    final resourceSingular = toPascal(_singular(resource));
+
+    return switch (httpMethod.toLowerCase()) {
+      'get' => isSingleItem ? 'get$resourceSingular' : 'list$resourcePascal',
+      'post' => 'create$resourceSingular',
+      'put' || 'patch' => 'update$resourceSingular',
+      'delete' => 'delete$resourceSingular',
+      _ => '${httpMethod.toLowerCase()}$resourcePascal',
+    };
+  }
+
   // ── layout hooks ───────────────────────────────────────────────────────────
 
   @override
@@ -266,13 +301,33 @@ class DashpodFileRenderer extends FileRenderer {
   }
 
   List<Map<String, dynamic>> _endpointContexts(Api api) {
+    // Pre-compute derived names and resolve duplicates with a numeric suffix.
+    // Names that appear more than once are all numbered (foo1, foo2, …) so
+    // no collision is silently shadowed.
+    final rawNames = [
+      for (final e in api.endpoints) _deriveMethodName(e.method.name, e.path),
+    ];
+    final totals = <String, int>{};
+    for (final n in rawNames) {
+      totals[n] = (totals[n] ?? 0) + 1;
+    }
+    final seen = <String, int>{};
+    final methodNames = [
+      for (final name in rawNames)
+        () {
+          if (totals[name]! == 1) return name;
+          final idx = seen[name] = (seen[name] ?? 0) + 1;
+          return '$name$idx';
+        }(),
+    ];
+
     final result = <Map<String, dynamic>>[];
-    for (final endpoint in api.endpoints) {
+    for (final (i, endpoint) in api.endpoints.indexed) {
       final stdCtx = endpoint.toTemplateContext(
         schemaRenderer,
         removePrefix: api.removePrefix,
       );
-      final methodName = stdCtx['methodName'] as String? ?? endpoint.methodName;
+      final methodName = methodNames[i];
       final returnType = stdCtx['returnType'] as String? ?? 'void';
 
       final params = <Map<String, dynamic>>[];

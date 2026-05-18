@@ -20,7 +20,7 @@ class _UsersApi implements UsersApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<UserDto> create1(CreateUserRequestDto createUserRequestDto) async {
+  Future<UserDto> createUser(CreateUserRequestDto createUserRequestDto) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -48,7 +48,7 @@ class _UsersApi implements UsersApi {
   }
 
   @override
-  Future<UserDto> me() async {
+  Future<UserDto> listMe() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};

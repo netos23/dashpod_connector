@@ -12,22 +12,24 @@ abstract class AppCollaboratorsApi {
   factory AppCollaboratorsApi(Dio dio) => _AppCollaboratorsApi(dio);
 
   @GET('/api/v1/apps/{appId}/collaborators')
-  Future<GetAppCollaboratorsResponseDto> list3(@Path('appId') String appId);
+  Future<GetAppCollaboratorsResponseDto> listCollaborators(
+    @Path('appId') String appId,
+  );
 
   @POST('/api/v1/apps/{appId}/collaborators')
-  Future<dynamic> add(
+  Future<dynamic> createCollaborator(
     @Path('appId') String appId,
     @Body() CreateAppCollaboratorRequestDto createAppCollaboratorRequestDto,
   );
 
   @DELETE('/api/v1/apps/{appId}/collaborators/{collaboratorId}')
-  Future<dynamic> remove(
+  Future<dynamic> deleteCollaborator(
     @Path('appId') String appId,
     @Path('collaboratorId') int collaboratorId,
   );
 
   @PATCH('/api/v1/apps/{appId}/collaborators/{collaboratorId}')
-  Future<dynamic> update2(
+  Future<dynamic> updateCollaborator(
     @Path('appId') String appId,
     @Path('collaboratorId') int collaboratorId,
     @Body() UpdateAppCollaboratorRequestDto updateAppCollaboratorRequestDto,
