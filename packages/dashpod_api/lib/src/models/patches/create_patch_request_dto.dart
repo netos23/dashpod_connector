@@ -11,7 +11,7 @@ class CreatePatchRequestDto {
       'CreatePatchRequestDto',
       json,
       () => CreatePatchRequestDto(
-        releaseId: (json['releaseId'] as int?),
+        releaseId: (json['release_id'] as int?),
         metadata: (json['metadata'] as Map<String, dynamic>?)?.map(
           (key, value) => MapEntry(key, value),
         ),
@@ -33,7 +33,7 @@ class CreatePatchRequestDto {
 
   /// Converts a [CreatePatchRequestDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
-    return {'releaseId': releaseId, 'metadata': metadata};
+    return {'release_id': releaseId, 'metadata': metadata};
   }
 
   @override

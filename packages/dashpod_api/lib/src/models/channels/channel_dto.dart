@@ -12,7 +12,7 @@ class ChannelDto {
       json,
       () => ChannelDto(
         id: (json['id'] as int?),
-        appId: json['appId'] as String?,
+        appId: json['app_id'] as String?,
         name: json['name'] as String?,
       ),
     );
@@ -33,7 +33,7 @@ class ChannelDto {
 
   /// Converts a [ChannelDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
-    return {'id': id, 'appId': appId, 'name': name};
+    return {'id': id, 'app_id': appId, 'name': name};
   }
 
   @override

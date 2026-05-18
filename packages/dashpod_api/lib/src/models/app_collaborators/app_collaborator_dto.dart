@@ -14,7 +14,7 @@ class AppCollaboratorDto {
       () => AppCollaboratorDto(
         id: (json['id'] as int?),
         email: json['email'] as String?,
-        displayName: json['displayName'] as String?,
+        displayName: json['display_name'] as String?,
         role: AppCollaboratorDtoRole.maybeFromJson(json['role'] as String?),
       ),
     );
@@ -39,7 +39,7 @@ class AppCollaboratorDto {
     return {
       'id': id,
       'email': email,
-      'displayName': displayName,
+      'display_name': displayName,
       'role': role?.toJson(),
     };
   }

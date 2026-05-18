@@ -17,9 +17,9 @@ class CreateReleaseRequestDto {
       json,
       () => CreateReleaseRequestDto(
         version: json['version'] as String?,
-        flutterRevision: json['flutterRevision'] as String?,
-        flutterVersion: json['flutterVersion'] as String?,
-        displayName: json['displayName'] as String?,
+        flutterRevision: json['flutter_revision'] as String?,
+        flutterVersion: json['flutter_version'] as String?,
+        displayName: json['display_name'] as String?,
       ),
     );
   }
@@ -42,9 +42,9 @@ class CreateReleaseRequestDto {
   Map<String, dynamic> toJson() {
     return {
       'version': version,
-      'flutterRevision': flutterRevision,
-      'flutterVersion': flutterVersion,
-      'displayName': displayName,
+      'flutter_revision': flutterRevision,
+      'flutter_version': flutterVersion,
+      'display_name': displayName,
     };
   }
 

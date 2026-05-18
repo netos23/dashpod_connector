@@ -11,8 +11,8 @@ class CreateAppRequestDto {
       'CreateAppRequestDto',
       json,
       () => CreateAppRequestDto(
-        displayName: json['displayName'] as String?,
-        organizationId: (json['organizationId'] as int?),
+        displayName: json['display_name'] as String?,
+        organizationId: (json['organization_id'] as int?),
       ),
     );
   }
@@ -31,7 +31,7 @@ class CreateAppRequestDto {
 
   /// Converts a [CreateAppRequestDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
-    return {'displayName': displayName, 'organizationId': organizationId};
+    return {'display_name': displayName, 'organization_id': organizationId};
   }
 
   @override

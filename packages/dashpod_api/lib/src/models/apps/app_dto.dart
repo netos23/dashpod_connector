@@ -12,7 +12,7 @@ class AppDto {
       json,
       () => AppDto(
         id: json['id'] as String?,
-        displayName: json['displayName'] as String?,
+        displayName: json['display_name'] as String?,
       ),
     );
   }
@@ -31,7 +31,7 @@ class AppDto {
 
   /// Converts an [AppDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
-    return {'id': id, 'displayName': displayName};
+    return {'id': id, 'display_name': displayName};
   }
 
   @override

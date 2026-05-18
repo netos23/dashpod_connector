@@ -21,10 +21,10 @@ class OrganizationDto {
         id: (json['id'] as int?),
         name: json['name'] as String?,
         organizationType: OrganizationDtoOrganizationType.maybeFromJson(
-          json['organizationType'] as String?,
+          json['organization_type'] as String?,
         ),
-        createdAt: maybeParseDateTime(json['createdAt'] as String?),
-        updatedAt: maybeParseDateTime(json['updatedAt'] as String?),
+        createdAt: maybeParseDateTime(json['created_at'] as String?),
+        updatedAt: maybeParseDateTime(json['updated_at'] as String?),
       ),
     );
   }
@@ -49,9 +49,9 @@ class OrganizationDto {
     return {
       'id': id,
       'name': name,
-      'organizationType': organizationType?.toJson(),
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'organization_type': organizationType?.toJson(),
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
     };
   }
 

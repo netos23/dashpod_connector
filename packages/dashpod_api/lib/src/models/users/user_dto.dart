@@ -21,11 +21,11 @@ class UserDto {
       () => UserDto(
         id: (json['id'] as int?),
         email: json['email'] as String?,
-        jwtIssuer: json['jwtIssuer'] as String?,
-        hasActiveSubscription: json['hasActiveSubscription'] as bool?,
-        displayName: json['displayName'] as String?,
-        stripeCustomerId: json['stripeCustomerId'] as String?,
-        patchOverageLimit: (json['patchOverageLimit'] as int?),
+        jwtIssuer: json['jwt_issuer'] as String?,
+        hasActiveSubscription: json['has_active_subscription'] as bool?,
+        displayName: json['display_name'] as String?,
+        stripeCustomerId: json['stripe_customer_id'] as String?,
+        patchOverageLimit: (json['patch_overage_limit'] as int?),
       ),
     );
   }
@@ -52,11 +52,11 @@ class UserDto {
     return {
       'id': id,
       'email': email,
-      'jwtIssuer': jwtIssuer,
-      'hasActiveSubscription': hasActiveSubscription,
-      'displayName': displayName,
-      'stripeCustomerId': stripeCustomerId,
-      'patchOverageLimit': patchOverageLimit,
+      'jwt_issuer': jwtIssuer,
+      'has_active_subscription': hasActiveSubscription,
+      'display_name': displayName,
+      'stripe_customer_id': stripeCustomerId,
+      'patch_overage_limit': patchOverageLimit,
     };
   }
 

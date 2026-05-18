@@ -21,14 +21,14 @@ class PatchArtifactDto {
       json,
       () => PatchArtifactDto(
         id: (json['id'] as int?),
-        patchId: (json['patchId'] as int?),
+        patchId: (json['patch_id'] as int?),
         arch: json['arch'] as String?,
         platform: PatchArtifactDtoPlatform.maybeFromJson(
           json['platform'] as String?,
         ),
         hash: json['hash'] as String?,
         size: (json['size'] as int?),
-        createdAt: maybeParseDateTime(json['createdAt'] as String?),
+        createdAt: maybeParseDateTime(json['created_at'] as String?),
       ),
     );
   }
@@ -54,12 +54,12 @@ class PatchArtifactDto {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'patchId': patchId,
+      'patch_id': patchId,
       'arch': arch,
       'platform': platform?.toJson(),
       'hash': hash,
       'size': size,
-      'createdAt': createdAt?.toIso8601String(),
+      'created_at': createdAt?.toIso8601String(),
     };
   }
 

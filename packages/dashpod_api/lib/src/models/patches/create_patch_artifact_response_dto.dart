@@ -21,7 +21,7 @@ class CreatePatchArtifactResponseDto {
       json,
       () => CreatePatchArtifactResponseDto(
         id: (json['id'] as int?),
-        patchId: (json['patchId'] as int?),
+        patchId: (json['patch_id'] as int?),
         arch: json['arch'] as String?,
         platform: CreatePatchArtifactResponseDtoPlatform.maybeFromJson(
           json['platform'] as String?,
@@ -56,7 +56,7 @@ class CreatePatchArtifactResponseDto {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'patchId': patchId,
+      'patch_id': patchId,
       'arch': arch,
       'platform': platform?.toJson(),
       'hash': hash,

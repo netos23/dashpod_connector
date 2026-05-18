@@ -12,7 +12,7 @@ class GetApiKeysResponseDto {
       'GetApiKeysResponseDto',
       json,
       () => GetApiKeysResponseDto(
-        apiKeys: (json['apiKeys'] as List?)
+        apiKeys: (json['api_keys'] as List?)
             ?.map<ApiKeyDto>(
               (e) => ApiKeyDto.fromJson(e as Map<String, dynamic>),
             )
@@ -34,7 +34,7 @@ class GetApiKeysResponseDto {
 
   /// Converts a [GetApiKeysResponseDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
-    return {'apiKeys': apiKeys?.map((e) => e.toJson()).toList()};
+    return {'api_keys': apiKeys?.map((e) => e.toJson()).toList()};
   }
 
   @override

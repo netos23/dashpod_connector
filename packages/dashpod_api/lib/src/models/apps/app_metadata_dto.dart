@@ -18,12 +18,12 @@ class AppMetadataDto {
       'AppMetadataDto',
       json,
       () => AppMetadataDto(
-        appId: json['appId'] as String?,
-        displayName: json['displayName'] as String?,
-        createdAt: maybeParseDateTime(json['createdAt'] as String?),
-        updatedAt: maybeParseDateTime(json['updatedAt'] as String?),
-        latestReleaseVersion: json['latestReleaseVersion'] as String?,
-        latestPatchNumber: (json['latestPatchNumber'] as int?),
+        appId: json['app_id'] as String?,
+        displayName: json['display_name'] as String?,
+        createdAt: maybeParseDateTime(json['created_at'] as String?),
+        updatedAt: maybeParseDateTime(json['updated_at'] as String?),
+        latestReleaseVersion: json['latest_release_version'] as String?,
+        latestPatchNumber: (json['latest_patch_number'] as int?),
       ),
     );
   }
@@ -47,12 +47,12 @@ class AppMetadataDto {
   /// Converts an [AppMetadataDto] to a `Map<String, dynamic>`.
   Map<String, dynamic> toJson() {
     return {
-      'appId': appId,
-      'displayName': displayName,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-      'latestReleaseVersion': latestReleaseVersion,
-      'latestPatchNumber': latestPatchNumber,
+      'app_id': appId,
+      'display_name': displayName,
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+      'latest_release_version': latestReleaseVersion,
+      'latest_patch_number': latestPatchNumber,
     };
   }
 

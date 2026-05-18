@@ -17,9 +17,9 @@ class PatchPayloadDto {
       json,
       () => PatchPayloadDto(
         number: (json['number'] as int?),
-        downloadUrl: json['downloadUrl'] as String?,
+        downloadUrl: json['download_url'] as String?,
         hash: json['hash'] as String?,
-        hashSignature: json['hashSignature'] as String?,
+        hashSignature: json['hash_signature'] as String?,
       ),
     );
   }
@@ -42,9 +42,9 @@ class PatchPayloadDto {
   Map<String, dynamic> toJson() {
     return {
       'number': number,
-      'downloadUrl': downloadUrl,
+      'download_url': downloadUrl,
       'hash': hash,
-      'hashSignature': hashSignature,
+      'hash_signature': hashSignature,
     };
   }
 

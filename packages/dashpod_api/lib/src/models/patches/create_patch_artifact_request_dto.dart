@@ -25,8 +25,8 @@ class CreatePatchArtifactRequestDto {
         ),
         hash: json['hash'] as String?,
         size: (json['size'] as int?),
-        hashSignature: json['hashSignature'] as String?,
-        podfileLockHash: json['podfileLockHash'] as String?,
+        hashSignature: json['hash_signature'] as String?,
+        podfileLockHash: json['podfile_lock_hash'] as String?,
       ),
     );
   }
@@ -56,8 +56,8 @@ class CreatePatchArtifactRequestDto {
       'platform': platform?.toJson(),
       'hash': hash,
       'size': size,
-      'hashSignature': hashSignature,
-      'podfileLockHash': podfileLockHash,
+      'hash_signature': hashSignature,
+      'podfile_lock_hash': podfileLockHash,
     };
   }
 
