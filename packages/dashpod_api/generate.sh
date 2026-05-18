@@ -11,6 +11,6 @@ echo "==> Generating API from OpenAPI spec..."
   -o "$PACKAGE_REL")
 
 echo "==> Running build_runner..."
-(cd "$PACKAGE_DIR" && dart run build_runner build --delete-conflicting-outputs)
+(cd "$PACKAGE_DIR" && dart run build_runner build)
 
 echo "==> Done."

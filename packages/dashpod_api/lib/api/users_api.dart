@@ -11,8 +11,8 @@ abstract class UsersApi {
   factory UsersApi(Dio dio) => _UsersApi(dio);
 
   @POST('/api/v1/users')
-  Future<UserDto> create1(@Body() CreateUserRequestDto createUserRequestDto);
+  Future<UserDto> createUser(@Body() CreateUserRequestDto createUserRequestDto);
 
   @GET('/api/v1/users/me')
-  Future<UserDto> me();
+  Future<UserDto> listMe();
 }

@@ -20,7 +20,7 @@ class _PatchesApi implements PatchesApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<CreatePatchArtifactResponseDto> createArtifact1(
+  Future<CreatePatchArtifactResponseDto> createArtifact(
     String appId,
     int patchId,
     CreatePatchArtifactRequestDto createPatchArtifactRequestDto,
@@ -52,7 +52,7 @@ class _PatchesApi implements PatchesApi {
   }
 
   @override
-  Future<dynamic> promote(
+  Future<dynamic> createPromote(
     String appId,
     PromotePatchRequestDto promotePatchRequestDto,
   ) async {
@@ -77,7 +77,7 @@ class _PatchesApi implements PatchesApi {
   }
 
   @override
-  Future<CreatePatchResponseDto> create4(
+  Future<CreatePatchResponseDto> createPatch(
     String appId,
     CreatePatchRequestDto createPatchRequestDto,
   ) async {

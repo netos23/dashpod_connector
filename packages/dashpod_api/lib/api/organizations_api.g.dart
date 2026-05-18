@@ -20,7 +20,38 @@ class _OrganizationsApi implements OrganizationsApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<OrgAvatarUploadUrlResponseDto> requestAvatarUploadUrl(
+  Future<OrganizationUserDto> createMember(
+    int organizationId,
+    InviteOrgMemberRequestDto inviteOrgMemberRequestDto,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(inviteOrgMemberRequestDto.toJson());
+    final _options = _setStreamType<OrganizationUserDto>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/organizations/${organizationId}/members',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late OrganizationUserDto _value;
+    try {
+      _value = OrganizationUserDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<OrgAvatarUploadUrlResponseDto> createAvatar(
     int organizationId,
     int contentLength,
   ) async {
@@ -50,7 +81,7 @@ class _OrganizationsApi implements OrganizationsApi {
   }
 
   @override
-  Future<GetOrganizationsResponseDto> list1() async {
+  Future<GetOrganizationsResponseDto> listOrganizations() async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -77,7 +108,7 @@ class _OrganizationsApi implements OrganizationsApi {
   }
 
   @override
-  Future<OrganizationMembershipDto> create2(
+  Future<OrganizationMembershipDto> createOrganization(
     CreateOrganizationRequestDto createOrganizationRequestDto,
   ) async {
     final _extra = <String, dynamic>{};
@@ -99,6 +130,90 @@ class _OrganizationsApi implements OrganizationsApi {
     late OrganizationMembershipDto _value;
     try {
       _value = OrganizationMembershipDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<dynamic> deleteMember(int organizationId, int userId) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<dynamic>(
+      Options(method: 'DELETE', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/organizations/${organizationId}/members/${userId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    return _value;
+  }
+
+  @override
+  Future<OrganizationUserDto> updateMember(
+    int organizationId,
+    int userId,
+    UpdateOrgMemberRoleRequestDto updateOrgMemberRoleRequestDto,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(updateOrgMemberRoleRequestDto.toJson());
+    final _options = _setStreamType<OrganizationUserDto>(
+      Options(method: 'PATCH', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/organizations/${organizationId}/members/${userId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late OrganizationUserDto _value;
+    try {
+      _value = OrganizationUserDto.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<OrganizationDto> updateOrganization(
+    int organizationId,
+    UpdateOrganizationRequestDto updateOrganizationRequestDto,
+  ) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(updateOrganizationRequestDto.toJson());
+    final _options = _setStreamType<OrganizationDto>(
+      Options(method: 'PATCH', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/organizations/${organizationId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late OrganizationDto _value;
+    try {
+      _value = OrganizationDto.fromJson(_result.data!);
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);
       rethrow;

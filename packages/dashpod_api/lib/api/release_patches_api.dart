@@ -11,7 +11,7 @@ abstract class ReleasePatchesApi {
   factory ReleasePatchesApi(Dio dio) => _ReleasePatchesApi(dio);
 
   @PATCH('/api/v1/apps/{appId}/releases/{releaseId}/patches/{patchId}')
-  Future<dynamic> update(
+  Future<dynamic> updatePatch(
     @Path('appId') String appId,
     @Path('releaseId') int releaseId,
     @Path('patchId') int patchId,
@@ -19,7 +19,7 @@ abstract class ReleasePatchesApi {
   );
 
   @GET('/api/v1/apps/{appId}/releases/{releaseId}/patches')
-  Future<GetReleasePatchesResponseDto> list6(
+  Future<GetReleasePatchesResponseDto> listPatches(
     @Path('appId') String appId,
     @Path('releaseId') int releaseId,
   );

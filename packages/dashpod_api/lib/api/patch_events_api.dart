@@ -10,7 +10,7 @@ abstract class PatchEventsApi {
   factory PatchEventsApi(Dio dio) => _PatchEventsApi(dio);
 
   @POST('/api/v1/patches/events')
-  Future<dynamic> report(
+  Future<dynamic> createEvent(
     @Body() CreatePatchEventRequestDto createPatchEventRequestDto,
   );
 }

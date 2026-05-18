@@ -33,25 +33,25 @@ abstract class ReleasesApi {
   );
 
   @GET('/api/v1/apps/{appId}/releases')
-  Future<GetReleasesResponseDto> list2(
+  Future<GetReleasesResponseDto> listReleases(
     @Path('appId') String appId,
     @Query('sideloadable') bool? sideloadable,
   );
 
   @POST('/api/v1/apps/{appId}/releases')
-  Future<CreateReleaseResponseDto> create3(
+  Future<CreateReleaseResponseDto> createRelease(
     @Path('appId') String appId,
     @Body() CreateReleaseRequestDto createReleaseRequestDto,
   );
 
   @GET('/api/v1/apps/{appId}/releases/{releaseId}')
-  Future<GetReleaseResponseDto> get(
+  Future<GetReleaseResponseDto> getRelease(
     @Path('appId') String appId,
     @Path('releaseId') int releaseId,
   );
 
   @PATCH('/api/v1/apps/{appId}/releases/{releaseId}')
-  Future<dynamic> update1(
+  Future<dynamic> updateRelease(
     @Path('appId') String appId,
     @Path('releaseId') int releaseId,
     @Body() UpdateReleaseRequestDto updateReleaseRequestDto,

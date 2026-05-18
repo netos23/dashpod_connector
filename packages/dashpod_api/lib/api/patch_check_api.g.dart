@@ -20,7 +20,7 @@ class _PatchCheckApi implements PatchCheckApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<PatchCheckResponseDto> check(
+  Future<PatchCheckResponseDto> createCheck(
     PatchCheckRequestDto patchCheckRequestDto,
   ) async {
     final _extra = <String, dynamic>{};

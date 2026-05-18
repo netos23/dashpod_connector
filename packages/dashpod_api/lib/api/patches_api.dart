@@ -14,20 +14,20 @@ abstract class PatchesApi {
   factory PatchesApi(Dio dio) => _PatchesApi(dio);
 
   @POST('/api/v1/apps/{appId}/patches/{patchId}/artifacts')
-  Future<CreatePatchArtifactResponseDto> createArtifact1(
+  Future<CreatePatchArtifactResponseDto> createArtifact(
     @Path('appId') String appId,
     @Path('patchId') int patchId,
     @Body() CreatePatchArtifactRequestDto createPatchArtifactRequestDto,
   );
 
   @POST('/api/v1/apps/{appId}/patches/promote')
-  Future<dynamic> promote(
+  Future<dynamic> createPromote(
     @Path('appId') String appId,
     @Body() PromotePatchRequestDto promotePatchRequestDto,
   );
 
   @POST('/api/v1/apps/{appId}/patches')
-  Future<CreatePatchResponseDto> create4(
+  Future<CreatePatchResponseDto> createPatch(
     @Path('appId') String appId,
     @Body() CreatePatchRequestDto createPatchRequestDto,
   );

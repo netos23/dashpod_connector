@@ -20,7 +20,7 @@ class _ChannelsApi implements ChannelsApi {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<List<ChannelDto>> list4(String appId) async {
+  Future<List<ChannelDto>> listChannels(String appId) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -49,7 +49,7 @@ class _ChannelsApi implements ChannelsApi {
   }
 
   @override
-  Future<ChannelDto> create5(
+  Future<ChannelDto> createChannel(
     String appId,
     CreateChannelRequestDto createChannelRequestDto,
   ) async {

@@ -12,13 +12,13 @@ abstract class ApiKeysApi {
   factory ApiKeysApi(Dio dio) => _ApiKeysApi(dio);
 
   @GET('/api/v1/users/me/api-keys')
-  Future<GetApiKeysResponseDto> list();
+  Future<GetApiKeysResponseDto> listApiKeys();
 
   @POST('/api/v1/users/me/api-keys')
-  Future<CreateApiKeyResponseDto> create(
+  Future<CreateApiKeyResponseDto> createApiKey(
     @Body() CreateApiKeyRequestDto createApiKeyRequestDto,
   );
 
   @DELETE('/api/v1/users/me/api-keys/{keyId}')
-  Future<dynamic> revoke(@Path('keyId') int keyId);
+  Future<dynamic> deleteApiKey(@Path('keyId') int keyId);
 }
