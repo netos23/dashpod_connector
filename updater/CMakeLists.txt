@@ -141,6 +141,10 @@ add_library(dashpod::updater ALIAS dashpod_updater_static)
 add_executable(updater tests/main.cpp)
 target_link_libraries(updater PRIVATE dashpod_updater_static)
 
+# Sibling package: bipatch+zstd encoder + `patch`/`string_patch` CLIs.
+# Lives in patch/ and reuses libzstd_static + OpenSSL from this scope.
+add_subdirectory(patch)
+
 option(DASHPOD_UPDATER_BUILD_TESTS "Build Catch2 unit tests" OFF)
 if(DASHPOD_UPDATER_BUILD_TESTS)
     enable_testing()

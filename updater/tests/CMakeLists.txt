@@ -12,6 +12,7 @@ add_executable(dashpod_updater_tests
     test_inflate.cpp
     test_lifecycle.cpp
     test_android.cpp
+    test_patch.cpp
 )
 
 target_include_directories(dashpod_updater_tests PRIVATE
@@ -21,6 +22,7 @@ target_include_directories(dashpod_updater_tests PRIVATE
 
 target_link_libraries(dashpod_updater_tests PRIVATE
     dashpod_updater_static
+    dashpod_patch
     Catch2::Catch2WithMain
     OpenSSL::Crypto
     OpenSSL::SSL
