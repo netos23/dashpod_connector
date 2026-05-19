@@ -25,11 +25,35 @@ export 'src/commands/doctor_command.dart' show DoctorCommand;
 export 'src/commands/init_command.dart' show InitCommand;
 export 'src/commands/login_command.dart' show LoginCommand;
 export 'src/commands/logout_command.dart' show LogoutCommand;
+export 'src/archive_diff/android_archive_differ.dart'
+    show AndroidArchiveDiffer, DexComparison;
+export 'src/archive_diff/archive_differ.dart'
+    show ArchiveDiffer, ContentDiffs, DiffStatus;
+export 'src/cache/patch_binary.dart' show PatchBinary, PatchBinaryArtifact;
+export 'src/code_signer/code_signer.dart'
+    show
+        CodeSigner,
+        CodeSignerException,
+        ExternalCommandCodeSigner,
+        PemCodeSigner,
+        decodeModulusExponentBase64,
+        decodePrivateKey,
+        decodePublicKeyPem,
+        encodePublicKeyAsModulusExponentDer,
+        verifySignature;
+export 'src/commands/patch/android_patcher.dart' show AndroidPatcher;
+export 'src/commands/patch/patch_command.dart'
+    show AndroidPatchSubcommand, PatchCommand;
+export 'src/commands/patch/patcher.dart'
+    show PatchArtifactBundle, PatchContext, Patcher;
 export 'src/commands/release/android_releaser.dart' show AndroidReleaser;
 export 'src/commands/release/release_command.dart'
     show AndroidReleaseSubcommand, ReleaseCommand;
 export 'src/commands/release/releaser.dart'
     show ReleaseContext, ReleaseResult, Releaser, UploadedArtifact;
+export 'src/patch_diff_checker/patch_diff_checker.dart'
+    show PatchDiffChecker, UnpatchableChangeException, UserCancelledException;
+export 'src/telemetry/create_patch_metadata.dart' show CreatePatchMetadata;
 export 'src/telemetry/update_release_metadata.dart'
     show UpdateReleaseMetadata, UpdateReleaseMetadataEnvironment;
 export 'src/doctor/doctor.dart'

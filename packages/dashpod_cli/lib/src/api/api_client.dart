@@ -21,6 +21,9 @@ class DashpodApiClient {
     required this.organizations,
     required this.users,
     required this.releases,
+    required this.patches,
+    required this.releasePatches,
+    required this.channels,
   });
 
   factory DashpodApiClient.build({
@@ -39,6 +42,9 @@ class DashpodApiClient {
       organizations: OrganizationsApi(dio),
       users: UsersApi(dio),
       releases: ReleasesApi(dio),
+      patches: PatchesApi(dio),
+      releasePatches: ReleasePatchesApi(dio),
+      channels: ChannelsApi(dio),
     );
   }
 
@@ -51,4 +57,7 @@ class DashpodApiClient {
   final OrganizationsApi organizations;
   final UsersApi users;
   final ReleasesApi releases;
+  final PatchesApi patches;
+  final ReleasePatchesApi releasePatches;
+  final ChannelsApi channels;
 }

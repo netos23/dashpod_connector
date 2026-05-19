@@ -9,12 +9,14 @@ import 'auth/auth_client.dart';
 import 'auth/auth_config.dart';
 import 'auth/credential_storage.dart';
 import 'cache/cache.dart';
+import 'cache/patch_binary.dart';
 import 'commands/account_command.dart';
 import 'commands/cache_command.dart';
 import 'commands/doctor_command.dart';
 import 'commands/init_command.dart';
 import 'commands/login_command.dart';
 import 'commands/logout_command.dart';
+import 'commands/patch/patch_command.dart';
 import 'commands/release/release_command.dart';
 import 'env/dashpod_env.dart';
 import 'io/console.dart';
@@ -66,8 +68,12 @@ class DashpodCliCommandRunner extends CommandRunner<int> {
     final resolvedAuth = authClient ?? _buildAuthClient(_env);
     final resolvedProcess =
         process ?? DashpodProcess(env: _env, logger: resolvedLogger);
-    final resolvedCache =
-        cache ?? Cache(env: _env, logger: resolvedLogger);
+    final resolvedCache = cache ??
+        Cache(
+          env: _env,
+          logger: resolvedLogger,
+          artifacts: const [PatchBinaryArtifact()],
+        );
     final resolvedFactory = apiClientFactory ??
         (DashpodEnv e) =>
             DashpodApiClient.build(env: e, authClient: resolvedAuth);
@@ -143,6 +149,15 @@ class DashpodCliCommandRunner extends CommandRunner<int> {
       json: _jsonSink,
       apiClientFactory: resolvedFactory,
       process: resolvedProcess,
+    ));
+    addCommand(PatchCommand(
+      env: _env,
+      console: resolvedConsole,
+      logger: resolvedLogger,
+      json: _jsonSink,
+      apiClientFactory: resolvedFactory,
+      process: resolvedProcess,
+      cache: resolvedCache,
     ));
   }
 
