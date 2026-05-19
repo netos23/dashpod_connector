@@ -1,4 +1,16 @@
 export 'src/api/api_client.dart' show DashpodApiClient, DashpodApiClientFactory;
+export 'src/artifact_builder/artifact_builder.dart'
+    show
+        AndroidAppBundleBuild,
+        AndroidArch,
+        ArtifactBuilder,
+        ArtifactBuildException;
+export 'src/artifact_manager/artifact_manager.dart'
+    show
+        ArtifactDigest,
+        ArtifactManager,
+        ArtifactManagerException,
+        ReleaseVersion;
 export 'src/auth/auth_client.dart' show AuthClient, UrlLauncher;
 export 'src/auth/auth_config.dart' show AuthConfig;
 export 'src/auth/auth_interceptor.dart' show AuthInterceptor;
@@ -13,6 +25,13 @@ export 'src/commands/doctor_command.dart' show DoctorCommand;
 export 'src/commands/init_command.dart' show InitCommand;
 export 'src/commands/login_command.dart' show LoginCommand;
 export 'src/commands/logout_command.dart' show LogoutCommand;
+export 'src/commands/release/android_releaser.dart' show AndroidReleaser;
+export 'src/commands/release/release_command.dart'
+    show AndroidReleaseSubcommand, ReleaseCommand;
+export 'src/commands/release/releaser.dart'
+    show ReleaseContext, ReleaseResult, Releaser, UploadedArtifact;
+export 'src/telemetry/update_release_metadata.dart'
+    show UpdateReleaseMetadata, UpdateReleaseMetadataEnvironment;
 export 'src/doctor/doctor.dart'
     show Doctor, DoctorResult, ValidatorOutcome;
 export 'src/doctor/validator.dart'

@@ -10,17 +10,22 @@ resolution: workspace
 
 dependencies:
   args: ^2.5.0
+  archive: ^4.0.0
   cli_util: ^0.4.1
+  convert: ^3.1.2
   crypto: ^3.0.6
   dio: ^5.7.0
   meta: ^1.16.0
   path: ^1.9.0
   openid_client: ^0.4.9
+  pub_semver: ^2.2.0
   yaml: ^3.1.3
   yaml_edit: ^2.2.0
 
   dashpod_api:
     path: ../dashpod_api
+  flutter_revision:
+    path: ../flutter_revision
 
 dev_dependencies:
   lints: ^6.0.0

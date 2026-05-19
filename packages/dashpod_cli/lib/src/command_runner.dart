@@ -15,6 +15,7 @@ import 'commands/doctor_command.dart';
 import 'commands/init_command.dart';
 import 'commands/login_command.dart';
 import 'commands/logout_command.dart';
+import 'commands/release/release_command.dart';
 import 'env/dashpod_env.dart';
 import 'io/console.dart';
 import 'json/json_output.dart';
@@ -134,6 +135,14 @@ class DashpodCliCommandRunner extends CommandRunner<int> {
       logger: resolvedLogger,
       json: _jsonSink,
       cache: resolvedCache,
+    ));
+    addCommand(ReleaseCommand(
+      env: _env,
+      console: resolvedConsole,
+      logger: resolvedLogger,
+      json: _jsonSink,
+      apiClientFactory: resolvedFactory,
+      process: resolvedProcess,
     ));
   }
 
