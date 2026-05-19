@@ -13,6 +13,7 @@ class LogoutCommand extends DashpodCommand {
   LogoutCommand({
     required super.env,
     required super.console,
+    required super.logger,
     required super.json,
     required AuthClient authClient,
   }) : _auth = authClient;
@@ -33,7 +34,7 @@ class LogoutCommand extends DashpodCommand {
     if (isJsonMode) {
       return emitJsonSuccess(data: {'was_authenticated': wasAuthorized});
     }
-    console.writeln(
+    logger.info(
       wasAuthorized
           ? 'Logged out. Local credential discarded.'
           : 'No stored credential found.',

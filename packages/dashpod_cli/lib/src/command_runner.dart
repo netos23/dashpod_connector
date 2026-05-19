@@ -8,12 +8,17 @@ import 'api/api_client.dart';
 import 'auth/auth_client.dart';
 import 'auth/auth_config.dart';
 import 'auth/credential_storage.dart';
+import 'cache/cache.dart';
+import 'commands/account_command.dart';
+import 'commands/cache_command.dart';
 import 'commands/init_command.dart';
 import 'commands/login_command.dart';
 import 'commands/logout_command.dart';
 import 'env/dashpod_env.dart';
 import 'io/console.dart';
 import 'json/json_output.dart';
+import 'logger/logger.dart';
+import 'process/dashpod_process.dart';
 
 const cliVersion = '0.0.1';
 
@@ -21,16 +26,19 @@ const cliVersion = '0.0.1';
 ///
 /// Responsibilities:
 ///   * declares the global flags `--version`, `--json`, `--verbose`
-///   * pre-scans argv for `--json` so that even usage / parse failures can
-///     emit the JSON envelope on stdout
-///   * constructs shared services (env, console, JSON sink, auth client,
-///     API client factory) and passes them to every registered command.
-///     There is no DI container — constructor injection is enough at this
-///     scale.
+///   * pre-scans argv for `--json` and `--verbose` so usage / parse
+///     failures honour the same modes as a successful command run
+///   * constructs shared services (env, console, logger, JSON sink, auth
+///     client, process wrapper, cache, API client factory) and passes
+///     them to every registered command. There is no DI container —
+///     constructor injection is enough at this scale.
 class DashpodCliCommandRunner extends CommandRunner<int> {
   DashpodCliCommandRunner({
     DashpodEnv? env,
     ConsoleIo? console,
+    Logger? logger,
+    DashpodProcess? process,
+    Cache? cache,
     DashpodApiClientFactory? apiClientFactory,
     AuthClient? authClient,
     IOSink? stdoutSink,
@@ -43,10 +51,27 @@ class DashpodCliCommandRunner extends CommandRunner<int> {
           'Developer CLI for the Dashpod code-push system.',
         ) {
     final resolvedConsole = console ?? ConsoleIo.fromStdio();
+    final resolvedLogger = logger ??
+        Logger(
+          stdoutSink: _stdout,
+          stderrSink: _stderr,
+          logsDirectory: _env.logsDirectory,
+          isVerbose: () => _verbose,
+          isJsonMode: () => _jsonMode,
+        );
+    _logger = resolvedLogger;
+
     final resolvedAuth = authClient ?? _buildAuthClient(_env);
+    final resolvedProcess =
+        process ?? DashpodProcess(env: _env, logger: resolvedLogger);
+    final resolvedCache =
+        cache ?? Cache(env: _env, logger: resolvedLogger);
     final resolvedFactory = apiClientFactory ??
         (DashpodEnv e) =>
             DashpodApiClient.build(env: e, authClient: resolvedAuth);
+
+    _process = resolvedProcess;
+    _cache = resolvedCache;
 
     argParser
       ..addFlag(
@@ -66,30 +91,42 @@ class DashpodCliCommandRunner extends CommandRunner<int> {
         help: 'Emit a single JSON envelope on stdout; suppress ANSI output.',
       );
 
-    addCommand(
-      InitCommand(
-        env: _env,
-        console: resolvedConsole,
-        apiClientFactory: resolvedFactory,
-        json: _jsonSink,
-      ),
-    );
-    addCommand(
-      LoginCommand(
-        env: _env,
-        console: resolvedConsole,
-        json: _jsonSink,
-        authClient: resolvedAuth,
-      ),
-    );
-    addCommand(
-      LogoutCommand(
-        env: _env,
-        console: resolvedConsole,
-        json: _jsonSink,
-        authClient: resolvedAuth,
-      ),
-    );
+    addCommand(InitCommand(
+      env: _env,
+      console: resolvedConsole,
+      logger: resolvedLogger,
+      apiClientFactory: resolvedFactory,
+      json: _jsonSink,
+    ));
+    addCommand(LoginCommand(
+      env: _env,
+      console: resolvedConsole,
+      logger: resolvedLogger,
+      json: _jsonSink,
+      authClient: resolvedAuth,
+    ));
+    addCommand(LogoutCommand(
+      env: _env,
+      console: resolvedConsole,
+      logger: resolvedLogger,
+      json: _jsonSink,
+      authClient: resolvedAuth,
+    ));
+    addCommand(AccountCommand(
+      env: _env,
+      console: resolvedConsole,
+      logger: resolvedLogger,
+      json: _jsonSink,
+      authClient: resolvedAuth,
+      apiClientFactory: resolvedFactory,
+    ));
+    addCommand(CacheCommand(
+      env: _env,
+      console: resolvedConsole,
+      logger: resolvedLogger,
+      json: _jsonSink,
+      cache: resolvedCache,
+    ));
   }
 
   static AuthClient _buildAuthClient(DashpodEnv env) {
@@ -102,25 +139,45 @@ class DashpodCliCommandRunner extends CommandRunner<int> {
   final DashpodEnv _env;
   final IOSink _stdout;
   final IOSink _stderr;
+  late final Logger _logger;
+  late final DashpodProcess _process;
+  late final Cache _cache;
   bool _jsonMode = false;
+  bool _verbose = false;
+
+  /// Exposed for tests / future commands that need to hand a shared
+  /// process wrapper to a service object.
+  DashpodProcess get process => _process;
+  Cache get cache => _cache;
+  Logger get logger => _logger;
 
   JsonOutputSink get _jsonSink => JsonOutputSink(
         sink: _stdout,
         enabled: () => _jsonMode,
       );
 
-  bool _detectJsonMode(List<String> args) => args.contains('--json');
+  bool _hasFlag(List<String> args, String flag, [String? short]) {
+    for (final a in args) {
+      if (a == flag) return true;
+      if (short != null && a == short) return true;
+    }
+    return false;
+  }
 
   @override
   Future<int?> run(Iterable<String> args) async {
     final argList = args.toList(growable: false);
-    _jsonMode = _detectJsonMode(argList);
+    _jsonMode = _hasFlag(argList, '--json');
+    _verbose = _hasFlag(argList, '--verbose', '-v');
     try {
       return await super.run(argList);
     } on FormatException catch (e) {
       return _emitUsageError(e.message);
     } on UsageException catch (e) {
       return _emitUsageError(e.message, usage: e.usage);
+    } finally {
+      await _logger.close();
+      _cache.close();
     }
   }
 

@@ -17,6 +17,7 @@ class LoginCommand extends DashpodCommand {
   LoginCommand({
     required super.env,
     required super.console,
+    required super.logger,
     required super.json,
     required AuthClient authClient,
   }) : _auth = authClient {
@@ -57,12 +58,9 @@ class LoginCommand extends DashpodCommand {
         launcher: (url) {
           // Print the URL *before* spawning the browser so users on
           // headless machines have it even if the launcher silently no-ops.
-          if (!isJsonMode) {
-            console
-              ..writeln('Opening browser for authentication…')
-              ..writeln('If it does not open automatically, visit:')
-              ..writeln('  $url');
-          }
+          logger.info('Opening browser for authentication…');
+          logger.info('If it does not open automatically, visit:');
+          logger.info('  $url');
           AuthClient.defaultLauncher(url);
         },
       );
@@ -91,17 +89,15 @@ class LoginCommand extends DashpodCommand {
       return emitJsonSuccess(data: data);
     }
 
-    if (email != null) {
-      console.writeln('$prefix $email.');
-    } else {
-      console.writeln('$prefix unknown user (no userinfo endpoint).');
-    }
+    logger.info(email != null
+        ? '$prefix $email.'
+        : '$prefix unknown user (no userinfo endpoint).');
     return 0;
   }
 
   int _fail(JsonErrorCode code, String message) {
     if (isJsonMode) return emitJsonError(code: code, message: message);
-    console.errorln(message);
+    logger.err(message);
     return 1;
   }
 }

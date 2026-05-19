@@ -34,6 +34,7 @@ class InitCommand extends DashpodCommand {
   InitCommand({
     required super.env,
     required super.console,
+    required super.logger,
     required super.json,
     required DashpodApiClientFactory apiClientFactory,
     DashpodYamlIo? yamlIo,
@@ -146,8 +147,8 @@ class InitCommand extends DashpodCommand {
       });
     }
 
-    console.writeln('Wrote ${dashpodYamlFile.path} (app_id: $appId).');
-    console.writeln(
+    logger.info('Wrote ${dashpodYamlFile.path} (app_id: $appId).');
+    logger.info(
       'Added ${p.basename(dashpodYamlFile.path)} to '
       '${p.basename(pubspec.path)} flutter.assets.',
     );
@@ -199,7 +200,7 @@ class InitCommand extends DashpodCommand {
     if (isJsonMode) {
       return emitJsonError(code: code, message: message);
     }
-    console.errorln(message);
+    logger.err(message);
     return code == JsonErrorCode.usageError ? 64 : 1;
   }
 }

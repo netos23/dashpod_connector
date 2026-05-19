@@ -56,6 +56,25 @@ class DashpodEnv {
   Directory get configDirectory =>
       Directory(p.join(applicationConfigHome('dashpod')));
 
+  /// Per-run log directory. The [Logger] writes a timestamped file here
+  /// on first use.
+  Directory get logsDirectory =>
+      Directory(p.join(configDirectory.path, 'logs'));
+
+  /// Root for the on-disk tool cache (`bin/cache/artifacts/…`). Lives
+  /// under the config directory rather than the install root so a
+  /// system-wide install doesn't need write permission.
+  Directory get cacheDirectory =>
+      Directory(p.join(configDirectory.path, 'cache'));
+
+  /// Path to the vendored Flutter SDK `bin/` directory, or null when the
+  /// CLI is not bundled with one. Returned without checking that the
+  /// directory exists — callers should treat null + missing dir the same
+  /// way. Will be populated by `dashpod flutter versions` in a later
+  /// tier; for now this is a placeholder so [DashpodProcess] can fall
+  /// back to the parent `PATH`.
+  Directory? get vendedFlutterBinDir => null;
+
   /// Walks up from `workingDirectory` looking for `pubspec.yaml`.
   /// Returns null if none is found.
   File? get pubspecFile {
