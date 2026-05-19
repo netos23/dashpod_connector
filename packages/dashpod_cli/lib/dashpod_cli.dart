@@ -46,6 +46,10 @@ export 'src/commands/patch/patch_command.dart'
     show AndroidPatchSubcommand, PatchCommand;
 export 'src/commands/patch/patcher.dart'
     show PatchArtifactBundle, PatchContext, Patcher;
+export 'src/commands/lifecycle/lifecycle_resolver.dart'
+    show LifecycleResolver, LifecycleResolveException;
+export 'src/commands/lifecycle/patches_command.dart' show PatchesCommand;
+export 'src/commands/lifecycle/releases_command.dart' show ReleasesCommand;
 export 'src/commands/release/android_releaser.dart' show AndroidReleaser;
 export 'src/commands/release/release_command.dart'
     show AndroidReleaseSubcommand, ReleaseCommand;
