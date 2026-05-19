@@ -11,6 +11,7 @@ import 'auth/credential_storage.dart';
 import 'cache/cache.dart';
 import 'commands/account_command.dart';
 import 'commands/cache_command.dart';
+import 'commands/doctor_command.dart';
 import 'commands/init_command.dart';
 import 'commands/login_command.dart';
 import 'commands/logout_command.dart';
@@ -96,6 +97,13 @@ class DashpodCliCommandRunner extends CommandRunner<int> {
       console: resolvedConsole,
       logger: resolvedLogger,
       apiClientFactory: resolvedFactory,
+      process: resolvedProcess,
+      json: _jsonSink,
+    ));
+    addCommand(DoctorCommand(
+      env: _env,
+      console: resolvedConsole,
+      logger: resolvedLogger,
       json: _jsonSink,
     ));
     addCommand(LoginCommand(

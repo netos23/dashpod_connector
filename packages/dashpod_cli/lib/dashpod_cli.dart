@@ -9,9 +9,22 @@ export 'src/command_runner.dart' show DashpodCliCommandRunner, cliVersion;
 export 'src/commands/account_command.dart' show AccountCommand;
 export 'src/commands/cache_command.dart' show CacheCommand;
 export 'src/commands/dashpod_command.dart' show DashpodCommand;
+export 'src/commands/doctor_command.dart' show DoctorCommand;
 export 'src/commands/init_command.dart' show InitCommand;
 export 'src/commands/login_command.dart' show LoginCommand;
 export 'src/commands/logout_command.dart' show LogoutCommand;
+export 'src/doctor/doctor.dart'
+    show Doctor, DoctorResult, ValidatorOutcome;
+export 'src/doctor/validator.dart'
+    show ValidationIssue, ValidationIssueSeverity, Validator;
+export 'src/doctor/validators/android_internet_permission_validator.dart'
+    show AndroidInternetPermissionValidator;
+export 'src/doctor/validators/dashpod_yaml_asset_validator.dart'
+    show DashpodYamlAssetValidator;
+export 'src/flavor/android_flavor_detector.dart' show AndroidFlavorDetector;
+export 'src/flavor/apple_flavor_detector.dart' show AppleFlavorDetector;
+export 'src/flavor/flavor_detector.dart'
+    show FlavorDetector, FlavorDetectionResult;
 export 'src/config/dashpod_yaml.dart'
     show DashpodYaml, DashpodYamlIo, PatchVerification;
 export 'src/env/dashpod_env.dart' show DashpodEnv;
